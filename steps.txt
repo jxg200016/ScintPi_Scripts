@@ -1,0 +1,2 @@
+Step 1:
+Data comes in binary format, we convert it to a hdf5 format.
