@@ -1,2 +1,7 @@
 Step 1:
-Data comes in binary format, we convert it to a hdf5 format.
+v3.2.5 Data comes in binary format, we convert it to a hdf5 format.
+v3.2.4 Data comes in txt format, time comes in GPStime
+v3.2.3 Data acquired at 25Hz(Only UTD)
+v3.2.2 Data without repetead values
+v3.0.0 [Normal data without v3.0.0]
+
