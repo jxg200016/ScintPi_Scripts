@@ -138,11 +138,10 @@ Reading HDF5 file
 '''
 # datafolder='/home/jm/Documents/2020.FABLAB/scintpi3SW/rawIQ1470_ismr'
 # daylist = ['20210308','20210309','20210310','20210311']
-datafolder='/media/jm/WD4TB/2021_ScintPi_paper/sc3_rawdata'
-daylist= ['20210715']
+datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'
+daylist= ['20210720']
 for daystring in daylist:
-#sc3_lvl0_20210705_739116.1250W_428126.9688N_v324
-	ismr = 0
+	ismr = False
 	dic={}
 	dic_out={}
 	maxsats=38
@@ -174,7 +173,7 @@ for daystring in daylist:
 					dic_out["%s_%03d_%s"%(GNSSid,sat,field)] =[]
 
 	raw_data_files=[]
-	raw_data_files = glob.glob("%s/sc3_lvl0_%s*.h5"%(datafolder,daystring))
+	raw_data_files = glob.glob("%s/sc3_lvl1_%s*.h5"%(datafolder,daystring))
 	raw_data_files.sort()
 
 	for h5filename in raw_data_files:
@@ -324,7 +323,7 @@ for daystring in daylist:
 				except:
 					continue
 
-		h5filename = h5filename.replace('sc3_lvl0','sc3_lvl4')
+		h5filename = h5filename.replace('sc3_lvl1','sc3_lvl2')
 		print ("Creating HDF5 file : %s"%(h5filename))
 		fileh5 = h5py.File(h5filename,'w')
 		for GNSSid in gnsslist:

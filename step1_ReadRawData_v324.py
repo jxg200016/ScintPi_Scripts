@@ -11,11 +11,11 @@ from datetime import datetime
 '''
 start_time = time.time()
 # datafolder='/home/jm/Documents/2020.FABLAB/scintpi3SW/rawIQ1470_ismr'
-datafolder='/media/jm/WD4TB/2021_ScintPi_paper/sc3_rawdata'
-daylist=['20210715']
+datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'  #where the uncompressed files are located
+daylist=['20210720']
 for daystring in daylist:
 	raw_data_files=[]
-	raw_data_files = glob.glob("%s/scintpi3_%s_*.dat"%(datafolder,daystring))
+	raw_data_files = glob.glob("%s\scintpi3_%s_*.dat"%(datafolder,daystring))
 	underscores=5#Number of underscores in path +1
 	raw_data_files.sort(key=lambda x: x.split('_')[underscores])
 	#Be carefull when we add some _ in the path, for each one add 1 on underscores
@@ -23,8 +23,7 @@ for daystring in daylist:
 		raw_input("No files on path.")
 	for singlefile in raw_data_files:
 		print (singlefile)
-
-    print ("If files are not ordered, check the number of underscores")
+	print ("If files are not ordered, check the number of underscores")
 	'''
 	Declaring dictionaries
 	'''
@@ -56,11 +55,12 @@ for daystring in daylist:
 	cols2read = [0,1,2,3,4,5,6,7,8,13,15]
 	fulldata=np.zeros((len(cols2read)))
 	for FILENAME in raw_data_files:
+		print ("reading:",FILENAME)
 		data = np.loadtxt(open(FILENAME,'rt').readlines()[:-1],delimiter='\t',usecols=cols2read, dtype=None)# unpack=True
 		fulldata=np.vstack((fulldata,data))
 
 	# GPSfromUTC = (datetime(1980,1,6) - datetime(1970,1,1)).total_seconds()
-    #Universal Time = TOW - leapseconds
+	#Universal Time = TOW - leapseconds
 	timevec = ( (fulldata[:,1]- fulldata[:,2])%86400)/86400.0*24.0
 	gnssvec = fulldata[:,3] #
 	svidvec = fulldata[:,4]
@@ -114,4 +114,4 @@ for daystring in daylist:
 						dataset = sub_group.create_dataset("%s"%(field), (1,rows), dtype =datatype)
 						dataset[...] = dic["%s_%03d_%s"%(GNSSid,eachsat,field)]
 	fileh5.close()
-		print("--- This process took %s seconds ---" % (time.time() - start_time))
+	print("--- This process took %s seconds ---" % (time.time() - start_time))

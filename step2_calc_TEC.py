@@ -42,15 +42,15 @@ def getwavelengths(conste):
 '''
 Reading HDF5 file
 '''
-datafolder='/media/jm/WD4TB/2021_ScintPi_paper/sc3_rawdata'
-daylist= ['20210708','20210709','20210710','20210711','20210712']
+datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'
+daylist= ['20210720']
 #septentrio sbf files avaliable?
 SEP = False
 for daystring in daylist:
 	raw_data_files=[]
 	raw_data_files = glob.glob("%s/sc3_lvl0_%s_*.h5"%(datafolder,daystring))
 	hdf5file = raw_data_files[0].split('/')[-1]
-
+	print(hdf5file)
 	dic={}
 	sep_dic={}
 	maxsats=38
@@ -67,7 +67,8 @@ for daystring in daylist:
 			for field in sep_out_fields:
 				sep_dic["%s_%03d_%s"%(GNSSid,sat,field)] =[]
 
-	h5filename = "%s/%s"%(datafolder,hdf5file)
+	# h5filename = "%s/%s"%(datafolder,hdf5file)
+	h5filename = hdf5file
 	print ("Reading *.h5 file")
 	h5file = h5py.File(h5filename,'r')
 	for conste in h5file.keys():
