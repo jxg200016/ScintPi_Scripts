@@ -15,7 +15,6 @@ start_time = time.time()
 datafolder='~/MyPath/ ' #where the uncompressed files are located
 daylist= ['20210309','20210310','20210311']
 for daystring in daylist:
-
 	raw_data_files=[]
 	raw_data_files = glob.glob("%s/scintpi3_%s_*.dat"%(datafolder,daystring))
 	underscores=3
@@ -25,6 +24,8 @@ for daystring in daylist:
 		raw_input("No files on path.")
 	for singlefile in raw_data_files:
 		print (singlefile)
+        
+    print ("If files are not ordered, check the number of underscores")
 
 	'''
 	Declaring dictionaries
@@ -81,13 +82,14 @@ for daystring in daylist:
 		fulldata=np.vstack((fulldata,data))
 
 	# GPSfromUTC = (datetime(1980,1,6) - datetime(1970,1,1)).total_seconds()
+    #Universal Time
 	timevec = np.add(np.add(fulldata[:,0],fulldata[:,1]/60.0 ), fulldata[:,2]/3600.0)
 	# timevec = np.add(np.add(fulldata[:,0]*3600,fulldata[:,1]*60.0 ), fulldata[:,2])
 
 	gnssvec = fulldata[:,3] #
 	svidvec = fulldata[:,4]
 
-	filefinal =raw_data_files[1].replace('_0400_','_')
+	filefinal =raw_data_files[0]
 	h5filename = filefinal.replace('.dat','.h5')
 	h5filename = h5filename.replace('scintpi3_','sc3_lvl0_')
     print ("Creating HDF5 file : %s"%(h5filename))
@@ -148,4 +150,4 @@ for daystring in daylist:
 						dataset = sub_group.create_dataset("%s"%(field), (1,rows), dtype =datatype)
 						dataset[...] = dic["%s_%03d_%s"%(GNSSid,eachsat,field)]
 	fileh5.close()
-	print("--- This process takes %s seconds ---" % (time.time() - start_time))
+	print("--- This process took %s seconds ---" % (time.time() - start_time))
