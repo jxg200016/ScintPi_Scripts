@@ -35,8 +35,9 @@ def sigma_phi_std_filter(filteredphasedata,timevec):
 				sigmaPhiList.append(sigmaPhi)
 			else :
 				sigmaPhiList.append(float("nan"))
-
-			sigmaPhitime.append(eachminute+(1/60))
+		else :
+			sigmaPhiList.append(float("nan"))
+		sigmaPhitime.append(eachminute+(1/60))
 	return sigmaPhiList,sigmaPhitime
 
 def butter_highpass(cutoff, fs, order=6):
