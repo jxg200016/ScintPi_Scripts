@@ -216,9 +216,6 @@ for daystring in daylist:
 						elevaData =   dic["%s_%03d_ELEV"%(GNSSid,eachsat)]
 						azitmData =   dic["%s_%03d_AZIT"%(GNSSid,eachsat)]
 						s4L1_values,s4L2_values,s4_timesr,s4_points1,s4_points2,s4_elev,s4_azit,snr1min,snr2min=s4_1min_2freq(powerDataL1,powerDataL2,timevec,elevaData,azitmData)
-
-						# s4L1_values,s4_timesr,s4_points,s4_elev,s4_azit=s4_1min(powerDataL1,timevec,elevaData,azitmData)
-						# s4L2_values,s4_timesr,s4_points,s4_elev,s4_azit=s4_1min(powerDataL2,timevec,elevaData,azitmData)
 						#WRITTING LOW RESOLUTION DATA
 						dic_out["%s_%03d_S4L1"%(GNSSid,eachsat)] = s4L1_values
 						dic_out["%s_%03d_S4L2"%(GNSSid,eachsat)] = s4L2_values
@@ -308,13 +305,12 @@ for daystring in daylist:
 							elevaData =   dic["%s_%03d_ELEV"%(GNSSid,eachsat)]
 							azitmData =   dic["%s_%03d_AZIT"%(GNSSid,eachsat)]
 
-							s4L1_values,s4L2_values,s4_timesr,s4_points1,s4_points2,s4_elev,s4_azit=s4_1min_2freq(powerDataL1,powerDataL2,timevec,elevaData,azitmData)
-
-							# s4L1_values,s4_timesr,s4_points,s4_elev,s4_azit=s4_1min(powerDataL1,timevec,elevaData,azitmData)
-							# s4L2_values,s4_timesr,s4_points,s4_elev,s4_azit=s4_1min(powerDataL2,timevec,elevaData,azitmData)
+							s4L1_values,s4L2_values,s4_timesr,s4_points1,s4_points2,s4_elev,s4_azit,snr1min,snr2min=s4_1min_2freq(powerDataL1,powerDataL2,timevec,elevaData,azitmData)
 							#WRITTING LOW RESOLUTION DATA
 							dic["%s_%03d_S4L1"%(GNSSid,eachsat)] = s4L1_values
 							dic["%s_%03d_S4L2"%(GNSSid,eachsat)] = s4L2_values
+							dic["%s_%03d_SNR1"%(GNSSid,eachsat)] = snr1min
+							dic["%s_%03d_SNR2"%(GNSSid,eachsat)] = snr2min
 							dic["%s_%03d_NSA1"%(GNSSid,eachsat)] = s4_points1
 							dic["%s_%03d_NSA2"%(GNSSid,eachsat)] = s4_points2
 							dic["%s_%03d_TIME"%(GNSSid,eachsat)] = s4_timesr
