@@ -5,7 +5,63 @@ import glob
 import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
+from scipy.signal import butter, lfilter
+from scipy.signal import freqz
 start_time = time.time()
+
+
+def sigma_phi_std_filter(filteredphasedata,timevec):
+	"""
+	timevec is carrier phase timestamp in seconds from 0 to 24
+	sigma_phi will estimate the sigma_phi from the phase
+		resolution : 1 min
+	"""
+	sigmaPhiList=[]
+	sigmaPhitime=[]
+	times=[]
+	frame =1
+	for eachminute in range(0,1440):
+		times.append(eachminute/60.0)
+	arr=np.array(timevec)
+	for eachminute in times:
+		# print (eachminute,eachminute+60 )
+		idxarray   = (arr >= eachminute) & (arr < (eachminute+(1/60) ) ) # bool array
+		# print ("len(idxarray):",timevec[idxarray])
+		if len(timevec[idxarray])>0:
+			tmp_time = timevec[idxarray]
+			phasedatafil = filteredphasedata[idxarray]
+			if len(timevec[idxarray])>500:
+				sigmaPhi= np.nanstd(phasedatafil)
+				sigmaPhiList.append(sigmaPhi)
+			else :
+				sigmaPhiList.append(float("nan"))
+
+			sigmaPhitime.append(eachminute+(1/60))
+	return sigmaPhiList,sigmaPhitime
+
+def butter_highpass(cutoff, fs, order=6):
+	"""
+	Design a highpass filter.
+
+	Args:
+		- cutoff (float) : the cutoff frequency of the filter.
+		- fs     (float) : the sampling rate.
+		- order    (int) : order of the filter, by default defined to 5.
+	"""
+	# calculate the Nyquist frequency
+	nyq = 0.5 * fs
+
+	# design filter
+	high = cutoff / nyq
+	b, a = butter(order, high, btype='high', analog=False)
+
+	# returns the filter coefficients: numerator and denominator
+	return b, a
+
+def butter_highpass_filter(data, cutoff, fs, order=6):
+	b, a = butter_highpass(cutoff, fs, order=order)
+	y = lfilter(b, a, data)
+	return y
 
 def readingISMR_TOW(SAT,FILENAME):
 	data = open(FILENAME,'r')
@@ -60,7 +116,7 @@ def PRN(gnssid,num):
 		return num
 
 def pow10(ampdB):
-    return math.pow(10.0,ampdB/10.0)
+	return math.pow(10.0,ampdB/10.0)
 def s4_1min_2freq(powerData1,powerData2,timevec,elevaData,azitmData):
 	""" s4 is a public function that finds the S4 index for a list of
 	power_amplitudes.
@@ -150,7 +206,7 @@ for daystring in daylist:
 	gnssdic={'00':'GPS','01':'SBS','02':'GAL','03':'BEI','06':'GLO'}
 	gnssname=['GPS','GALILEO','Beidou','GLONAS']
 	in_fields =['SNR1','SNR2','ELEV','TIME','AZIT','PHS1','PHS2']
-	out_fields=['S4L1','S4L2','ELEV','TIME','AZIT','NSA1','NSA2','SNR1','SNR2'] # 1 min resolution # add 1 min TEC
+	out_fields=['S4L1','S4L2','SIG1','SIG2','ELEV','TIME','AZIT','NSA1','NSA2','SNR1','SNR2'] # 1 min resolution # add 1 min TEC
 	sep_fields=['S_S4L1','S_S4L2','S_ELEV','S_TIME']
 
 	for GNSSid in gnssdic:
@@ -215,6 +271,30 @@ for daystring in daylist:
 						timevec   =   (dic["%s_%03d_TIME"%(GNSSid,eachsat)])
 						elevaData =   dic["%s_%03d_ELEV"%(GNSSid,eachsat)]
 						azitmData =   dic["%s_%03d_AZIT"%(GNSSid,eachsat)]
+
+						rphase1=np.array(dic["%s_%03d_PHS1"%(GNSSid,eachsat)])
+						rphase2=np.array(dic["%s_%03d_PHS2"%(GNSSid,eachsat)])
+
+						init_time = timevec[0]
+
+						phasedatarad1 = rphase1*2*np.pi
+						phasedatarad2 = rphase2*2*np.pi
+
+						cutoffsc3 = 1.0
+						fs = 10.0
+
+						fdetrended1 = butter_highpass_filter(phasedatarad1, cutoffsc3, fs, order=6)
+						fdetrended2 = butter_highpass_filter(phasedatarad2, cutoffsc3, fs, order=6)
+
+						#thresholded detrended by filter
+						threshold=0.5
+						tfdetrended1 = np.where((-threshold<fdetrended1) & (fdetrended1<threshold),fdetrended1,float("nan"))
+						tfdetrended2 = np.where((-threshold<fdetrended2) & (fdetrended2<threshold),fdetrended2,float("nan") )
+
+						fsigma1R,fsigmtime1R = sigma_phi_std_filter(tfdetrended1,timevec)
+						fsigma2R,fsigmtime2R = sigma_phi_std_filter(tfdetrended2,timevec)
+
+
 						s4L1_values,s4L2_values,s4_timesr,s4_points1,s4_points2,s4_elev,s4_azit,snr1min,snr2min=s4_1min_2freq(powerDataL1,powerDataL2,timevec,elevaData,azitmData)
 						#WRITTING LOW RESOLUTION DATA
 						dic_out["%s_%03d_S4L1"%(GNSSid,eachsat)] = s4L1_values
@@ -226,6 +306,8 @@ for daystring in daylist:
 						dic_out["%s_%03d_TIME"%(GNSSid,eachsat)] = s4_timesr
 						dic_out["%s_%03d_ELEV"%(GNSSid,eachsat)] = s4_elev
 						dic_out["%s_%03d_AZIT"%(GNSSid,eachsat)] = s4_azit
+						dic_out["%s_%03d_SIG1"%(GNSSid,eachsat)] = fsigma1R
+						dic_out["%s_%03d_SIG2"%(GNSSid,eachsat)] = fsigma2R
 
 						if ismr :
 							prn = PRN(GNSSid,eachsat)
@@ -307,15 +389,17 @@ for daystring in daylist:
 
 							s4L1_values,s4L2_values,s4_timesr,s4_points1,s4_points2,s4_elev,s4_azit,snr1min,snr2min=s4_1min_2freq(powerDataL1,powerDataL2,timevec,elevaData,azitmData)
 							#WRITTING LOW RESOLUTION DATA
-							dic["%s_%03d_S4L1"%(GNSSid,eachsat)] = s4L1_values
-							dic["%s_%03d_S4L2"%(GNSSid,eachsat)] = s4L2_values
-							dic["%s_%03d_SNR1"%(GNSSid,eachsat)] = snr1min
-							dic["%s_%03d_SNR2"%(GNSSid,eachsat)] = snr2min
-							dic["%s_%03d_NSA1"%(GNSSid,eachsat)] = s4_points1
-							dic["%s_%03d_NSA2"%(GNSSid,eachsat)] = s4_points2
-							dic["%s_%03d_TIME"%(GNSSid,eachsat)] = s4_timesr
-							dic["%s_%03d_ELEV"%(GNSSid,eachsat)] = s4_elev
-							dic["%s_%03d_AZIT"%(GNSSid,eachsat)] = s4_azit
+							dic_out["%s_%03d_S4L1"%(GNSSid,eachsat)] = s4L1_values
+							dic_out["%s_%03d_S4L2"%(GNSSid,eachsat)] = s4L2_values
+							dic_out["%s_%03d_SNR1"%(GNSSid,eachsat)] = snr1min
+							dic_out["%s_%03d_SNR2"%(GNSSid,eachsat)] = snr2min
+							dic_out["%s_%03d_NSA1"%(GNSSid,eachsat)] = s4_points1
+							dic_out["%s_%03d_NSA2"%(GNSSid,eachsat)] = s4_points2
+							dic_out["%s_%03d_TIME"%(GNSSid,eachsat)] = s4_timesr
+							dic_out["%s_%03d_ELEV"%(GNSSid,eachsat)] = s4_elev
+							dic_out["%s_%03d_AZIT"%(GNSSid,eachsat)] = s4_azit
+							dic_out["%s_%03d_SIG1"%(GNSSid,eachsat)] = fsigma1R
+							dic_out["%s_%03d_SIG2"%(GNSSid,eachsat)] = fsigma2R
 				except:
 					continue
 
