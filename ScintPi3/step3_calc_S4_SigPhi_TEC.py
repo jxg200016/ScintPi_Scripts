@@ -206,8 +206,8 @@ for daystring in daylist:
 	# gnsslist=['00'] # only GPS
 	gnssdic={'00':'GPS','01':'SBS','02':'GAL','03':'BEI','06':'GLO'}
 	gnssname=['GPS','GALILEO','Beidou','GLONAS']
-	in_fields =['SNR1','SNR2','ELEV','TIME','AZIT','PHS1','PHS2']
-	out_fields=['S4L1','S4L2','SIG1','SIG2','ELEV','TIME','AZIT','NSA1','NSA2','SNR1','SNR2'] # 1 min resolution # add 1 min TEC
+	in_fields =['SNR1','SNR2','ELEV','TIME','AZIT','PHS1','PHS2','TEC']
+	out_fields=['S4L1','S4L2','SIG1','SIG2','ELEV','TIME','AZIT','NSA1','NSA2','SNR1','SNR2','STEC','TTEC'] # 1 min resolution # add 1 min TEC
 	sep_fields=['S_S4L1','S_S4L2','S_ELEV','S_TIME']
 
 	for GNSSid in gnssdic:
@@ -273,6 +273,9 @@ for daystring in daylist:
 						elevaData =   dic["%s_%03d_ELEV"%(GNSSid,eachsat)]
 						azitmData =   dic["%s_%03d_AZIT"%(GNSSid,eachsat)]
 
+						dic_out["%s_%03d_STEC"%(GNSSid,eachsat)] = dic["%s_%03d_TEC"%(GNSSid,eachsat)]
+						dic_out["%s_%03d_TTEC"%(GNSSid,eachsat)] = timevec
+
 						rphase1=np.array(dic["%s_%03d_PHS1"%(GNSSid,eachsat)])
 						rphase2=np.array(dic["%s_%03d_PHS2"%(GNSSid,eachsat)])
 
@@ -281,7 +284,7 @@ for daystring in daylist:
 						phasedatarad1 = rphase1*2*np.pi
 						phasedatarad2 = rphase2*2*np.pi
 
-						cutoffsc3 = 1.0
+						cutoffsc3 = 1.0 #Cut off 1Hz
 						fs = 10.0
 
 						fdetrended1 = butter_highpass_filter(phasedatarad1, cutoffsc3, fs, order=6)
@@ -417,7 +420,8 @@ for daystring in daylist:
 						for field in out_fields:
 							# print ("/%s/SVID%02d-%s"%(gnssdic[GNSSid],eachsat,field))
 							datatype= type(dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)][0])
-							dataset = sub_group.create_dataset("%s"%(field), (1,rows), dtype =datatype)
+							veclengh= len(dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)])
+							dataset = sub_group.create_dataset("%s"%(field), (1,veclengh), dtype =datatype)
 							dataset[...] = dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)]
 
 						rowsSEP=len(dic_out["%s_%03d_%s"%(GNSSid,eachsat,'S_TIME')])
