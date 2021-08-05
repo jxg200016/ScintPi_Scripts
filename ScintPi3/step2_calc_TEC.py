@@ -55,8 +55,8 @@ for daystring in daylist:
 	sep_dic={}
 	maxsats=38
 	gnsslist=['00','01','02','03','06']
-	gnssdic={'00':'GPS','10':'GPS','01':'SBS','02':'GAL','03':'BEI','06':'GLO'}
-	gnssname=['GPS','GALILEO','Beidou','GLONAS']
+	gnssdic={'00':'GPS','10':'GPS','01':'SBS','02':'GAL','03':'BDS','06':'GLO'}
+	gnssname=['GPS','GALILEO','BeiDou','GLONAS']
 	sat_fields=['SNR1','SNR2','PHS1','PHS2','ELEV','TIME','AZIT']
 	out_fields=['SNR1','SNR2','ELEV','TIME','AZIT','TEC','PHS1','PHS2']
 	sep_out_fields=['S_TIME','S_TEC']
@@ -78,7 +78,7 @@ for daystring in daylist:
 			gnssid = '01'
 		elif conste == 'GAL':
 			gnssid = '02'
-		elif conste == 'BEI':
+		elif conste == 'BDS':
 			gnssid = '03'
 		elif conste == 'GLO':
 			gnssid = '06'
@@ -104,7 +104,7 @@ for daystring in daylist:
 				gnssid = '00'
 			elif conste == 'GAL':
 				gnssid = '02'
-			elif conste == 'BEI':
+			elif conste == 'BDS':
 				gnssid = '03'
 			elif conste == 'GLO':
 				gnssid = '06'

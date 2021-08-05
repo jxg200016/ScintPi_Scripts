@@ -24,14 +24,14 @@ for daystring in daylist:
 		raw_input("No files on path.")
 	for singlefile in raw_data_files:
 		print (singlefile)
-        
+
     print ("If files are not ordered, check the number of underscores")
 
 	'''
 	Declaring dictionaries
 	'''
 	gnsslist=['00','01','02','03','06']
-	gnssdic={'00':'GPS','01':'SBS','02':'GAL','03':'BEI','06':'GLO'}
+	gnssdic={'00':'GPS','01':'SBS','02':'GAL','03':'BDS','06':'GLO'}
 	gnssname=['GPS','SBAS','GALILEO','BEIDOU','GLONAS']
 	sat_fields=['SNR1','SNR2','ELEV','TIME','AZIT','PHS1','PHS2']#'PSE1','PSE2'
 

@@ -28,7 +28,7 @@ for daystring in daylist:
 	Declaring dictionaries
 	'''
 	gnsslist=['00','01','02','03','06']
-	gnssdic={'00':'GPS','10':'GPS','01':'SBS','02':'GAL','03':'BEI','06':'GLO'}
+	gnssdic={'00':'GPS','10':'GPS','01':'SBS','02':'GAL','03':'BDS','06':'GLO'}
 	gnssname=['GPS','SBAS','GALILEO','BEIDOU','GLONAS']
 	sat_fields=['SNR1','SNR2','ELEV','TIME','AZIT','PHS1','PHS2']#'PSE1','PSE2'
 

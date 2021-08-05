@@ -9,7 +9,7 @@ datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'  #where the uncompressed 
 daylist=['20210801']
 # daylist=['20210801']
 sat_fields=['SNR1','SNR2','ELEV','TIME','AZIT','PHS1','PHS2']#'PSE1','PSE2'
-gnssdic={0:'GPS',1:'SBS',2:'GAL',3:'BEI',6:'GLO'}
+gnssdic={0:'GPS',1:'SBS',2:'GAL',3:'BDS',6:'GLO'}
 for daystring in daylist:
 	raw_data_files=[]
 	raw_data_files = glob.glob("%s/scintpi3_%s_*.bin"%(datafolder,daystring))

@@ -204,10 +204,10 @@ for daystring in daylist:
 	maxsats=38
 	gnsslist=['00','01','02','03','06']
 	# gnsslist=['00'] # only GPS
-	gnssdic={'00':'GPS','01':'SBS','02':'GAL','03':'BEI','06':'GLO'}
-	gnssname=['GPS','GALILEO','Beidou','GLONAS']
+	gnssdic={'00':'GPS','01':'SBS','02':'GAL','03':'BDS','06':'GLO'}
+	gnssname=['GPS','GALILEO','BeiDou','GLONAS']
 	in_fields =['SNR1','SNR2','ELEV','TIME','AZIT','PHS1','PHS2','TEC']
-	out_fields=['S4L1','S4L2','SIG1','SIG2','ELEV','TIME','AZIT','NAS1','NAS2','SNR1','SNR2','STEC','TTEC'] # 1 min resolution # add 1 min TEC
+	out_fields=['S4L1','S4L2','SIG1','SIG2','ELEV','TIME','AZIT','NAS1','NAS2','SNR1','SNR2','RTEC','TECT'] # 1 min resolution # add 1 min TEC
 	sep_fields=['S_S4L1','S_S4L2','S_ELEV','S_TIME']
 
 	for GNSSid in gnssdic:
@@ -246,7 +246,7 @@ for daystring in daylist:
 				gnssid = '01'
 			elif conste == 'GAL':
 				gnssid = '02'
-			elif conste == 'BEI':
+			elif conste == 'BDS':
 				gnssid = '03'
 			elif conste == 'GLO':
 				gnssid = '06'
@@ -273,8 +273,8 @@ for daystring in daylist:
 						elevaData =   dic["%s_%03d_ELEV"%(GNSSid,eachsat)]
 						azitmData =   dic["%s_%03d_AZIT"%(GNSSid,eachsat)]
 
-						dic_out["%s_%03d_STEC"%(GNSSid,eachsat)] = dic["%s_%03d_TEC"%(GNSSid,eachsat)]
-						dic_out["%s_%03d_TTEC"%(GNSSid,eachsat)] = timevec
+						dic_out["%s_%03d_RTEC"%(GNSSid,eachsat)] = dic["%s_%03d_TEC"%(GNSSid,eachsat)]
+						dic_out["%s_%03d_TECT"%(GNSSid,eachsat)] = timevec
 
 						rphase1=np.array(dic["%s_%03d_PHS1"%(GNSSid,eachsat)])
 						rphase2=np.array(dic["%s_%03d_PHS2"%(GNSSid,eachsat)])
