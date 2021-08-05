@@ -207,7 +207,7 @@ for daystring in daylist:
 	gnssdic={'00':'GPS','01':'SBS','02':'GAL','03':'BEI','06':'GLO'}
 	gnssname=['GPS','GALILEO','Beidou','GLONAS']
 	in_fields =['SNR1','SNR2','ELEV','TIME','AZIT','PHS1','PHS2','TEC']
-	out_fields=['S4L1','S4L2','SIG1','SIG2','ELEV','TIME','AZIT','NSA1','NSA2','SNR1','SNR2','STEC','TTEC'] # 1 min resolution # add 1 min TEC
+	out_fields=['S4L1','S4L2','SIG1','SIG2','ELEV','TIME','AZIT','NAS1','NAS2','SNR1','SNR2','STEC','TTEC'] # 1 min resolution # add 1 min TEC
 	sep_fields=['S_S4L1','S_S4L2','S_ELEV','S_TIME']
 
 	for GNSSid in gnssdic:
@@ -305,8 +305,8 @@ for daystring in daylist:
 						dic_out["%s_%03d_S4L2"%(GNSSid,eachsat)] = s4L2_values
 						dic_out["%s_%03d_SNR1"%(GNSSid,eachsat)] = snr1min
 						dic_out["%s_%03d_SNR2"%(GNSSid,eachsat)] = snr2min
-						dic_out["%s_%03d_NSA1"%(GNSSid,eachsat)] = s4_points1
-						dic_out["%s_%03d_NSA2"%(GNSSid,eachsat)] = s4_points2
+						dic_out["%s_%03d_NAS1"%(GNSSid,eachsat)] = s4_points1
+						dic_out["%s_%03d_NAS2"%(GNSSid,eachsat)] = s4_points2
 						dic_out["%s_%03d_TIME"%(GNSSid,eachsat)] = s4_timesr
 						dic_out["%s_%03d_ELEV"%(GNSSid,eachsat)] = s4_elev
 						dic_out["%s_%03d_AZIT"%(GNSSid,eachsat)] = s4_azit
@@ -397,8 +397,8 @@ for daystring in daylist:
 							dic_out["%s_%03d_S4L2"%(GNSSid,eachsat)] = s4L2_values
 							dic_out["%s_%03d_SNR1"%(GNSSid,eachsat)] = snr1min
 							dic_out["%s_%03d_SNR2"%(GNSSid,eachsat)] = snr2min
-							dic_out["%s_%03d_NSA1"%(GNSSid,eachsat)] = s4_points1
-							dic_out["%s_%03d_NSA2"%(GNSSid,eachsat)] = s4_points2
+							dic_out["%s_%03d_NAS1"%(GNSSid,eachsat)] = s4_points1
+							dic_out["%s_%03d_NAS2"%(GNSSid,eachsat)] = s4_points2
 							dic_out["%s_%03d_TIME"%(GNSSid,eachsat)] = s4_timesr
 							dic_out["%s_%03d_ELEV"%(GNSSid,eachsat)] = s4_elev
 							dic_out["%s_%03d_AZIT"%(GNSSid,eachsat)] = s4_azit
