@@ -1,3 +1,7 @@
+'''
+rsync -a --progress -e "ssh -i /home/jm/Documents/scintpi.key -p 22" scintpi@debye.utdallas.edu:/mfs/io/groups/uars/scintpi/sc000/scintpi3_20210801*.bin.zip /mnt/c/Users/JmGomezs/Documents/Scintpi/
+'''
+
 import numpy as np
 import glob
 import os
@@ -8,8 +12,8 @@ from datetime import timedelta
 execute_commands = True
 outfolder = "~/Documents/"
 Len_Rawdata = 52
-group = 'sc002'
-datelist=['20210621','20210622','20210623','20210624','20210625','20210626','20210627']
+group = 'sc000'
+datelist=['20210801']
 #1. Download last day scintpis data :
 
 #1.1 Creating datestring
@@ -20,7 +24,7 @@ for daystring in datelist:
 	print("1. Downloading data from:", daystring)
 	rsync_command = "rsync -a --progress -e \"ssh -i ~/.ssh/scintpi.key -p 22\" scintpi@debye.utdallas.edu:/mfs/io/groups/uars/scintpi/%s/scintpi3_%s_* %s"%(group,daystring,outfolder)
 	'''
-	rsync -a --progress -e "ssh -i /home/jm/Documents/scintpi.key -p 22" scintpi@debye.utdallas.edu:/mfs/io/groups/uars/scintpi/sc002/scintpi3_20210720* /mnt/c/Users/JmGomezs/Documents/Scintpi/
+	rsync -a --progress -e "ssh -i /home/jm/Documents/scintpi.key -p 22" scintpi@debye.utdallas.edu:/mfs/io/groups/uars/scintpi/sc000/scintpi3_20210720* /mnt/c/Users/JmGomezs/Documents/Scintpi/
 	'''
 	print (rsync_command)
 	if execute_commands:

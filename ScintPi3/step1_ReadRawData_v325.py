@@ -5,7 +5,7 @@ import numpy as np #sudo apt-get install python3-numpy
 import time
 import h5py #sudo apt-get install python3-h5py
 
-datafolder='/home/jm/Documents/2020.FABLAB/scintpi3SW/325'
+datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'  #where the uncompressed files are located
 daylist=['20210801']
 # daylist=['20210801']
 sat_fields=['SNR1','SNR2','ELEV','TIME','AZIT','PHS1','PHS2']#'PSE1','PSE2'
