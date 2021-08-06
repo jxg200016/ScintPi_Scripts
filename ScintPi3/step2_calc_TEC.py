@@ -43,7 +43,7 @@ def getwavelengths(conste):
 Reading HDF5 file
 '''
 datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'
-daylist= ['20210720']
+daylist= ['20210801']
 #septentrio sbf files avaliable?
 SEP = False
 for daystring in daylist:
@@ -137,10 +137,13 @@ for daystring in daylist:
 				rphase1 = remove_cycleslips(phase1,2000)
 				rphase2 = remove_cycleslips(phase2,2000)
 				#So one value is added
+
 				rphase1=np.hstack((rphase1,rphase1[-1]))
 				rphase2=np.hstack((rphase2,rphase2[-1]))
 
-				tec = (-phase2*L2_wlen+phase1*L1_wlen)/0.104
+				tec = (-rphase2*L2_wlen+rphase1*L1_wlen)/0.104
+				plt.plot(tec)
+				plt.show()
 				tec = remove_spikes(tec,0.225)
 				tec=np.hstack((tec,tec[-1]))
 				SaveMin = np.nanmin(tec)

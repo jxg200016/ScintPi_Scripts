@@ -104,7 +104,7 @@ for daystring in daylist:
 			 rng3[idx],
 			 long[idx],
 			 lati[idx],
-			 heig[idx]) = struct.unpack("@ifBBBBbiBBBBBBBBBfffffffff", data[(68*idx):68*(idx+1)])
+			 heig[idx]) = struct.unpack("@ifBBBBbiBBBBBBBBBffffddfff", data[(68*idx):68*(idx+1)])
 		f_week = np.hstack((f_week, week))
 		f_towe = np.hstack((f_towe, towe))
 		f_leap = np.hstack((f_leap, leap))
