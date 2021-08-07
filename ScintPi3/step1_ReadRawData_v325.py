@@ -8,7 +8,7 @@ import h5py #sudo apt-get install python3-h5py
 datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'  #where the uncompressed files are located
 daylist=['20210801']
 # daylist=['20210801']
-sat_fields=['SNR1','SNR2','ELEV','TIME','AZIT','PHS1','PHS2']#'PSE1','PSE2'
+sat_fields=['SNR1','SNR2','ELEV','T_TW','T_WN','AZIM','PHS1','PHS2']#'PSE1','PSE2'
 gnssdic={0:'GPS',1:'SBS',2:'GAL',3:'BDS',6:'GLO'}
 for daystring in daylist:
 	raw_data_files=[]
@@ -36,12 +36,12 @@ for daystring in daylist:
 	f_rst1 = np.zeros(shape=(1), dtype=np.uint8)
 	f_rst2 = np.zeros(shape=(1), dtype=np.uint8)
 	f_rst3 = np.zeros(shape=(1), dtype=np.uint8)
-	f_cph1 = np.zeros(shape=(1), dtype=np.float32)
-	f_cph2 = np.zeros(shape=(1), dtype=np.float32)
-	f_cph3 = np.zeros(shape=(1), dtype=np.float32)
-	f_rng1 = np.zeros(shape=(1), dtype=np.float32)
-	f_rng2 = np.zeros(shape=(1), dtype=np.float32)
-	f_rng3 = np.zeros(shape=(1), dtype=np.float32)
+	f_cph1 = np.zeros(shape=(1), dtype=np.float64)
+	f_cph2 = np.zeros(shape=(1), dtype=np.float64)
+	f_cph3 = np.zeros(shape=(1), dtype=np.float64)
+	f_rng1 = np.zeros(shape=(1), dtype=np.float64)
+	f_rng2 = np.zeros(shape=(1), dtype=np.float64)
+	f_rng3 = np.zeros(shape=(1), dtype=np.float64)
 	f_long = np.zeros(shape=(1), dtype=np.float32)
 	f_lati = np.zeros(shape=(1), dtype=np.float32)
 	f_heig = np.zeros(shape=(1), dtype=np.float32)
@@ -69,12 +69,12 @@ for daystring in daylist:
 		rst1 = np.zeros(shape=(n_lines), dtype=np.uint8)
 		rst2 = np.zeros(shape=(n_lines), dtype=np.uint8)
 		rst3 = np.zeros(shape=(n_lines), dtype=np.uint8)
-		cph1 = np.zeros(shape=(n_lines), dtype=np.float32)
-		cph2 = np.zeros(shape=(n_lines), dtype=np.float32)
-		cph3 = np.zeros(shape=(n_lines), dtype=np.float32)
-		rng1 = np.zeros(shape=(n_lines), dtype=np.float32)
-		rng2 = np.zeros(shape=(n_lines), dtype=np.float32)
-		rng3 = np.zeros(shape=(n_lines), dtype=np.float32)
+		cph1 = np.zeros(shape=(n_lines), dtype=np.float64)
+		cph2 = np.zeros(shape=(n_lines), dtype=np.float64)
+		cph3 = np.zeros(shape=(n_lines), dtype=np.float64)
+		rng1 = np.zeros(shape=(n_lines), dtype=np.float64)
+		rng2 = np.zeros(shape=(n_lines), dtype=np.float64)
+		rng3 = np.zeros(shape=(n_lines), dtype=np.float64)
 		long = np.zeros(shape=(n_lines), dtype=np.float32)
 		lati = np.zeros(shape=(n_lines), dtype=np.float32)
 		heig = np.zeros(shape=(n_lines), dtype=np.float32)
@@ -104,7 +104,7 @@ for daystring in daylist:
 			 rng3[idx],
 			 long[idx],
 			 lati[idx],
-			 heig[idx]) = struct.unpack("@ifBBBBbiBBBBBBBBBffffddfff", data[(68*idx):68*(idx+1)])
+			 heig[idx]) = struct.unpack("@ifBBBBbiBBBBBBBBBddddddfff", data[(68*idx):68*(idx+1)])
 		f_week = np.hstack((f_week, week))
 		f_towe = np.hstack((f_towe, towe))
 		f_leap = np.hstack((f_leap, leap))
@@ -151,14 +151,15 @@ for daystring in daylist:
 		validsats = (satellites != 0 )
 		for each_sat in satellites[validsats]:
 			idxarray2 = (tmp_svidvec == each_sat)
-			dic["%02d_%03d_TIME"%(GNSSid,each_sat)] =timevec[idxarray][idxarray2]
+			dic["%02d_%03d_T_TW"%(GNSSid,each_sat)] = f_towe[idxarray][idxarray2]
+			dic["%02d_%03d_T_TW"%(GNSSid,each_sat)] = f_week[idxarray][idxarray2]
 			dic["%02d_%03d_ELEV"%(GNSSid,each_sat)] = f_elev[idxarray][idxarray2]
-			dic["%02d_%03d_AZIT"%(GNSSid,each_sat)] = f_azit[idxarray][idxarray2]
+			dic["%02d_%03d_AZIM"%(GNSSid,each_sat)] = f_azit[idxarray][idxarray2]
 			dic["%02d_%03d_SNR1"%(GNSSid,each_sat)] = f_snr1[idxarray][idxarray2]
 			dic["%02d_%03d_SNR2"%(GNSSid,each_sat)] = f_snr2[idxarray][idxarray2]
 			dic["%02d_%03d_PHS1"%(GNSSid,each_sat)] = f_cph1[idxarray][idxarray2]
 			dic["%02d_%03d_PHS2"%(GNSSid,each_sat)] = f_cph2[idxarray][idxarray2]
-			rows=len(dic["%02d_%03d_TIME"%(GNSSid,each_sat)])
+			rows=len(dic["%02d_%03d_T_TW"%(GNSSid,each_sat)])
 			#wtf?
 			print (each_sat)
 			sub_group = fileh5.create_group("/%s/SVID%03d"%(gnssdic[GNSSid],each_sat))

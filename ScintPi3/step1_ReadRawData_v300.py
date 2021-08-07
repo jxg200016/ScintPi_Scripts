@@ -33,7 +33,7 @@ for daystring in daylist:
 	gnsslist=['00','01','02','03','06']
 	gnssdic={'00':'GPS','01':'SBS','02':'GAL','03':'BDS','06':'GLO'}
 	gnssname=['GPS','SBAS','GALILEO','BEIDOU','GLONAS']
-	sat_fields=['SNR1','SNR2','ELEV','TIME','AZIT','PHS1','PHS2']#'PSE1','PSE2'
+	sat_fields=['SNR1','SNR2','ELEV','T_TW','AZIM','PHS1','PHS2']#'PSE1','PSE2'
 
 	dic={}
 	maxsats= 38
@@ -83,6 +83,7 @@ for daystring in daylist:
 
 	# GPSfromUTC = (datetime(1980,1,6) - datetime(1970,1,1)).total_seconds()
     #Universal Time
+    #TODO : CHANGE TO TIME OF WEEK, CONVERT FROM UT TO TOW AND WEEK
 	timevec = np.add(np.add(fulldata[:,0],fulldata[:,1]/60.0 ), fulldata[:,2]/3600.0)
 	# timevec = np.add(np.add(fulldata[:,0]*3600,fulldata[:,1]*60.0 ), fulldata[:,2])
 
@@ -108,9 +109,9 @@ for daystring in daylist:
 				'''
 				tmp_timeu = timevec[idxarray][idxarray2]
 				tmp_timeuu,indices2,counts =  np.unique(tmp_timeu,return_index=True,return_counts=True)#TO avoid repeat data
-				dic["%s_%03d_TIME"%(GNSSid,eachsat)] = timevec[idxarray][idxarray2][indices2]
+				dic["%s_%03d_T_TW"%(GNSSid,eachsat)] = timevec[idxarray][idxarray2][indices2]
 				dic["%s_%03d_ELEV"%(GNSSid,eachsat)] = fulldata[:,5][idxarray][idxarray2][indices2]
-				dic["%s_%03d_AZIT"%(GNSSid,eachsat)] = fulldata[:,6][idxarray][idxarray2][indices2]
+				dic["%s_%03d_AZIM"%(GNSSid,eachsat)] = fulldata[:,6][idxarray][idxarray2][indices2]
 				dic["%s_%03d_SNR1"%(GNSSid,eachsat)] = fulldata[:,7][idxarray][idxarray2][indices2]
 				dic["%s_%03d_PHS1"%(GNSSid,eachsat)] = fulldata[:,9][idxarray][idxarray2][indices2]
 				dic["%s_%03d_SNR2"%(GNSSid,eachsat)] = fulldata[:,8][idxarray][idxarray2][indices2]
@@ -133,14 +134,14 @@ for daystring in daylist:
 
 				tmp_timeu = timevec[idxarray][idxarray2]
 				tmp_timeuu,indices2 =  np.unique(tmp_timeu,return_index=True)
-				dic["%s_%03d_TIME"%(GNSSid,eachsat)] = timevec[idxarray][idxarray2][indices2]
+				dic["%s_%03d_T_TW"%(GNSSid,eachsat)] = timevec[idxarray][idxarray2][indices2]
 				dic["%s_%03d_ELEV"%(GNSSid,eachsat)] = fulldata[:,5][idxarray][idxarray2][indices2]
-				dic["%s_%03d_AZIT"%(GNSSid,eachsat)] = fulldata[:,6][idxarray][idxarray2][indices2]
+				dic["%s_%03d_AZIM"%(GNSSid,eachsat)] = fulldata[:,6][idxarray][idxarray2][indices2]
 				dic["%s_%03d_SNR1"%(GNSSid,eachsat)] = fulldata[:,7][idxarray][idxarray2][indices2]
 				dic["%s_%03d_SNR2"%(GNSSid,eachsat)] = fulldata[:,8][idxarray][idxarray2][indices2]
 				dic["%s_%03d_PHS1"%(GNSSid,eachsat)] = fulldata[:,9][idxarray][idxarray2][indices2]
 				dic["%s_%03d_PHS2"%(GNSSid,eachsat)] = fulldata[:,10][idxarray][idxarray2][indices2]
-				rows=len(dic["%s_%03d_TIME"%(GNSSid,eachsat)])
+				rows=len(dic["%s_%03d_T_TW"%(GNSSid,eachsat)])
 				# print ("rows:",rows)
 				if rows>0:
 					sub_group = fileh5.create_group("/%s/SVID%03d"%(gnssdic[GNSSid],eachsat))

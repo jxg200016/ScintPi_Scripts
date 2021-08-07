@@ -43,8 +43,9 @@ def getwavelengths(conste):
 Reading HDF5 file
 '''
 datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'
-daylist= ['20210801']
+daylist= ['20210720']
 #septentrio sbf files avaliable?
+#v325 will not work until I read tow and week :( 
 SEP = False
 for daystring in daylist:
 	raw_data_files=[]
@@ -57,9 +58,9 @@ for daystring in daylist:
 	gnsslist=['00','01','02','03','06']
 	gnssdic={'00':'GPS','10':'GPS','01':'SBS','02':'GAL','03':'BDS','06':'GLO'}
 	gnssname=['GPS','GALILEO','BeiDou','GLONAS']
-	sat_fields=['SNR1','SNR2','PHS1','PHS2','ELEV','TIME','AZIM']
-	out_fields=['SNR1','SNR2','ELEV','TIME','AZIM','PTEC','PHS1','PHS2']
-	sep_out_fields=['S_TIME','S_TEC']
+	sat_fields=['SNR1','SNR2','PHS1','PHS2','ELEV','T_TW','AZIM']
+	out_fields=['SNR1','SNR2','ELEV','T_TW','AZIM','PTEC','PHS1','PHS2']
+	sep_out_fields=['S_T_TW','S_TEC']
 	for GNSSid in gnssdic:
 		for sat in range(0,maxsats):
 			for field in sat_fields:
@@ -122,7 +123,7 @@ for daystring in daylist:
 
 	for GNSSid in gnsslist:
 		for eachsat in range(0,maxsats):
-			notempty = len(dic["%s_%03d_TIME"%(GNSSid,eachsat)])
+			notempty = len(dic["%s_%03d_T_TW"%(GNSSid,eachsat)])
 			if notempty != 0 :
 				L1_wlen, L2_wlen = getwavelengths(GNSSid)
 				phase1=np.array(dic["%s_%03d_PHS1"%(GNSSid,eachsat)])
@@ -142,10 +143,9 @@ for daystring in daylist:
 				rphase2=np.hstack((rphase2,rphase2[-1]))
 
 				tec = (-rphase2*L2_wlen+rphase1*L1_wlen)/0.104
-				plt.plot(tec)
-				plt.show()
 				tec = remove_spikes(tec,0.225)
 				tec=np.hstack((tec,tec[-1]))
+
 				SaveMin = np.nanmin(tec)
 				tec =tec - np.ones(len(tec))*SaveMin
 				dic["%s_%03d_PTEC"%(GNSSid,eachsat)]  = tec
@@ -159,7 +159,7 @@ for daystring in daylist:
 	for GNSSid in gnsslist:
 		group = fileh5.create_group("%s"%(gnssdic[GNSSid]))
 		for eachsat in range(1,maxsats):
-			rows=len(dic["%s_%03d_%s"%(GNSSid,eachsat,'TIME')])
+			rows=len(dic["%s_%03d_%s"%(GNSSid,eachsat,'T_TW')])
 			if rows>0:
 				sub_group = fileh5.create_group("/%s/SVID%03d"%(gnssdic[GNSSid],eachsat))
 				for field in out_fields:
@@ -169,7 +169,7 @@ for daystring in daylist:
 					dataset[...] = dic["%s_%03d_%s"%(GNSSid,eachsat,field)]
 
 				if SEP:
-					sep_rows=len(sep_dic["%s_%03d_%s"%(GNSSid,eachsat,'S_TIME')])
+					sep_rows=len(sep_dic["%s_%03d_%s"%(GNSSid,eachsat,'S_T_TW')])
 					if sep_rows:
 						for field in sep_out_fields:
 							print ("/%s/SVID%03d-%s"%(gnssdic[GNSSid],eachsat,field))

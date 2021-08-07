@@ -206,8 +206,8 @@ for daystring in daylist:
 	# gnsslist=['00'] # only GPS
 	gnssdic={'00':'GPS','01':'SBS','02':'GAL','03':'BDS','06':'GLO'}
 	gnssname=['GPS','GALILEO','BeiDou','GLONAS']
-	in_fields =['SNR1','SNR2','ELEV','S_TW','AZIM','PHS1','PHS2','TEC']
-	out_fields=['S401','S402','SIG1','SIG2','ELEV','S_TW','S_WN','AZIM','NOS1','NOS2','SNR1','SNR2','PTEC','TECT'] # 1 min resolution # add 1 min TEC
+	in_fields =['SNR1','SNR2','ELEV','T_TW','AZIM','PHS1','PHS2','TEC']
+	out_fields=['S401','S402','SIG1','SIG2','ELEV','S_TW','AZIM','NOS1','NOS2','SNR1','SNR2','PTEC','T_TW'] # 1 min resolution # add 1 min TEC
 	sep_fields=['S_S401','S_S402','S_ELEV','S_S_TW']
 
 	for GNSSid in gnssdic:
@@ -262,19 +262,19 @@ for daystring in daylist:
 		for GNSSid in gnsslist:
 			if GNSSid !='01':
 				for eachsat in range(0,maxsats):
-					notempty = len(dic["%s_%03d_S_TW"%(GNSSid,eachsat)])
+					notempty = len(dic["%s_%03d_T_TW"%(GNSSid,eachsat)])
 					# print (eachsat)
 					if notempty != 0 :
 						#GETTING HIGH RESOLUTION DATA
 						powerDataL1 = dic["%s_%03d_SNR1"%(GNSSid,eachsat)]
 						powerDataL2 = dic["%s_%03d_SNR2"%(GNSSid,eachsat)]
-						# timevec   =   (dic["%s_%03d_S_TW"%(GNSSid,eachsat)]%86400)/86400.0*24.0
-						timevec   =   (dic["%s_%03d_S_TW"%(GNSSid,eachsat)])
+						# timevec   =   (dic["%s_%03d_T_TW"%(GNSSid,eachsat)]%86400)/86400.0*24.0
+						timevec   =   (dic["%s_%03d_T_TW"%(GNSSid,eachsat)])
 						elevaData =   dic["%s_%03d_ELEV"%(GNSSid,eachsat)]
 						azitmData =   dic["%s_%03d_AZIM"%(GNSSid,eachsat)]
 
-						dic_out["%s_%03d_RTEC"%(GNSSid,eachsat)] = dic["%s_%03d_TEC"%(GNSSid,eachsat)]
-						dic_out["%s_%03d_TECT"%(GNSSid,eachsat)] = timevec
+						dic_out["%s_%03d_PTEC"%(GNSSid,eachsat)] = dic["%s_%03d_PTEC"%(GNSSid,eachsat)]
+						dic_out["%s_%03d_T_TW"%(GNSSid,eachsat)] = timevec
 
 						rphase1=np.array(dic["%s_%03d_PHS1"%(GNSSid,eachsat)])
 						rphase2=np.array(dic["%s_%03d_PHS2"%(GNSSid,eachsat)])
@@ -381,13 +381,13 @@ for daystring in daylist:
 				try:
 					sbas_sats=[131,133,136,138]
 					for eachsat in sbas_sats:
-						notempty = len(dic["%s_%03d_S_TW"%(GNSSid,eachsat)])
+						notempty = len(dic["%s_%03d_T_TW"%(GNSSid,eachsat)])
 						print (eachsat)
 						if notempty != 0 :
 							#GETTING HIGH RESOLUTION DATA
 							powerDataL1 = dic["%s_%03d_SNR1"%(GNSSid,eachsat)]
 							powerDataL2 = dic["%s_%03d_SNR2"%(GNSSid,eachsat)]
-							timevec   =   dic["%s_%03d_S_TW"%(GNSSid,eachsat)]
+							timevec   =   dic["%s_%03d_T_TW"%(GNSSid,eachsat)]
 							elevaData =   dic["%s_%03d_ELEV"%(GNSSid,eachsat)]
 							azitmData =   dic["%s_%03d_AZIM"%(GNSSid,eachsat)]
 
@@ -418,7 +418,7 @@ for daystring in daylist:
 					if rows>0:
 						sub_group = fileh5.create_group("/%s/SVID%03d"%(gnssdic[GNSSid],eachsat))
 						for field in out_fields:
-							# print ("/%s/SVID%02d-%s"%(gnssdic[GNSSid],eachsat,field))
+							print ("/%s/SVID%02d-%s"%(gnssdic[GNSSid],eachsat,field))
 							datatype= type(dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)][0])
 							veclengh= len(dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)])
 							dataset = sub_group.create_dataset("%s"%(field), (1,veclengh), dtype =datatype)
@@ -440,9 +440,10 @@ for daystring in daylist:
 							for field in out_fields:
 								# print ("/%s/SVID%02d-%s"%(gnssdic[GNSSid],eachsat,field))
 								datatype= type(dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)][0])
-								dataset = sub_group.create_dataset("%s"%(field), (1,rows), dtype =datatype)
+								veclengh= len(dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)])
+								dataset = sub_group.create_dataset("%s"%(field), (1,veclengh), dtype =datatype)
 								dataset[...] = dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)]
-
+					#TODO : SBAS DONT HAVE TEC, HOW EXPORT S4 AND SIGMAPHI?
 							rowsSEP=len(dic_out["%s_%03d_%s"%(GNSSid,eachsat,'S_S_TW')])
 							if rowsSEP>0:
 								for field in sep_fields:

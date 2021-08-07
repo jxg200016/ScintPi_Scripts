@@ -1,5 +1,5 @@
 '''
-rsync -a --progress -e "ssh -i /home/jm/Documents/scintpi.key -p 22" scintpi@debye.utdallas.edu:/mfs/io/groups/uars/scintpi/sc000/scintpi3_20210801*.bin.zip /mnt/c/Users/JmGomezs/Documents/Scintpi/
+rsync -a --progress -e "ssh -i /home/jm/Documents/scintpi.key -p 22" scintpi@debye.utdallas.edu:/mfs/io/groups/uars/scintpi/sc000/scintpi3_20210806*.bin.zip /mnt/c/Users/JmGomezs/Documents/Scintpi/
 '''
 
 import numpy as np
