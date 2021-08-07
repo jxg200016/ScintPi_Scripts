@@ -57,8 +57,8 @@ for daystring in daylist:
 	gnsslist=['00','01','02','03','06']
 	gnssdic={'00':'GPS','10':'GPS','01':'SBS','02':'GAL','03':'BDS','06':'GLO'}
 	gnssname=['GPS','GALILEO','BeiDou','GLONAS']
-	sat_fields=['SNR1','SNR2','PHS1','PHS2','ELEV','TIME','AZIT']
-	out_fields=['SNR1','SNR2','ELEV','TIME','AZIT','TEC','PHS1','PHS2']
+	sat_fields=['SNR1','SNR2','PHS1','PHS2','ELEV','TIME','AZIM']
+	out_fields=['SNR1','SNR2','ELEV','TIME','AZIM','PTEC','PHS1','PHS2']
 	sep_out_fields=['S_TIME','S_TEC']
 	for GNSSid in gnssdic:
 		for sat in range(0,maxsats):
@@ -148,7 +148,7 @@ for daystring in daylist:
 				tec=np.hstack((tec,tec[-1]))
 				SaveMin = np.nanmin(tec)
 				tec =tec - np.ones(len(tec))*SaveMin
-				dic["%s_%03d_TEC"%(GNSSid,eachsat)]  = tec
+				dic["%s_%03d_PTEC"%(GNSSid,eachsat)]  = tec
 				#we re-write carrierphases witout jumps
 				dic["%s_%03d_PHS1"%(GNSSid,eachsat)] = rphase1
 				dic["%s_%03d_PHS2"%(GNSSid,eachsat)] = rphase2
