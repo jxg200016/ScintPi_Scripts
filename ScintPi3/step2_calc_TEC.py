@@ -43,9 +43,10 @@ def getwavelengths(conste):
 Reading HDF5 file
 '''
 datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'
-daylist= ['20210720']
+# daylist= ['20210720']
+daylist=['20210807']
 #septentrio sbf files avaliable?
-#v325 will not work until I read tow and week :( 
+#v325 will not work until I read tow and week :(
 SEP = False
 for daystring in daylist:
 	raw_data_files=[]
