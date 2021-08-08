@@ -19,7 +19,7 @@ datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'  #where the uncompressed 
 daylist=['20210807']
 # daylist=['20210801']
 #Be carefull some bin files could be wrong (analize why!)
-sat_fields=['SNR1','SNR2','ELEV','T_TW','T_WN','AZIM','PHS1','PHS2']#'PSE1','PSE2'
+sat_fields=['SNR1','SNR2','ELEV','T_TW','T_WN','AZIM','PHS1','PHS2','PSE1','PSE2']#
 gnssdic={0:'GPS',1:'SBS',2:'GAL',3:'BDS',6:'GLO'}
 for daystring in daylist:
 	raw_data_files=[]
@@ -198,6 +198,8 @@ for daystring in daylist:
 			dic["%02d_%03d_SNR2"%(GNSSid,each_sat)] = f_snr2[idxarray][idxarray2]
 			dic["%02d_%03d_PHS1"%(GNSSid,each_sat)] = f_cph1[idxarray][idxarray2]
 			dic["%02d_%03d_PHS2"%(GNSSid,each_sat)] = f_cph2[idxarray][idxarray2]
+			dic["%02d_%03d_PSE1"%(GNSSid,each_sat)] = f_rng1[idxarray][idxarray2]
+			dic["%02d_%03d_PSE2"%(GNSSid,each_sat)] = f_rng2[idxarray][idxarray2]
 			rows=len(dic["%02d_%03d_T_TW"%(GNSSid,each_sat)])
 			#wtf?
 			print (each_sat)
