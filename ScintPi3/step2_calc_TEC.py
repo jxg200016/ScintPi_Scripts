@@ -3,7 +3,7 @@ import time
 import glob
 import numpy as np
 import matplotlib.pyplot as plt
-
+#TODO add code tec!
 '''
 Declaring some functions
 '''
@@ -59,8 +59,8 @@ for daystring in daylist:
 	gnsslist=['00','01','02','03','06']
 	gnssdic={'00':'GPS','10':'GPS','01':'SBS','02':'GAL','03':'BDS','06':'GLO'}
 	gnssname=['GPS','GALILEO','BeiDou','GLONAS']
-	sat_fields=['SNR1','SNR2','PHS1','PHS2','ELEV','T_TW','AZIM']
-	out_fields=['SNR1','SNR2','ELEV','T_TW','AZIM','PTEC','PHS1','PHS2']
+	sat_fields=['SNR1','SNR2','PHS1','PHS2','ELEV','T_TW','T_WN','AZIM']
+	out_fields=['SNR1','SNR2','ELEV','T_TW','T_WN','AZIM','PTEC','PHS1','PHS2']
 	sep_out_fields=['S_T_TW','S_TEC']
 	for GNSSid in gnssdic:
 		for sat in range(0,maxsats):

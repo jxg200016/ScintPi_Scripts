@@ -4,6 +4,7 @@ import os
 import numpy as np #sudo apt-get install python3-numpy
 import time
 import h5py #sudo apt-get install python3-h5py
+#TODO : test with data sampled at 25Hz
 '''
 i 4
 f 4
@@ -170,7 +171,7 @@ for daystring in daylist:
 		f_heig = np.hstack((f_heig, heig))
 		print("--- %s seconds ---" % (time.time() - start_time))
 
-	timevec = ( (f_towe- f_leap)%86400)/86400.0*24.0
+	# timevec = ( (f_towe- f_leap)%86400)/86400.0*24.0
 	constellations = np.unique(f_cons)
 	print (constellations)
 	# input("Checkhere")
@@ -184,7 +185,7 @@ for daystring in daylist:
 	for GNSSid in constellations :
 		idxarray   = (f_cons == GNSSid) #& (arr < (eachminute+60) ) # bool array
 		satellites = np.unique(f_svid[idxarray])
-		tmp_timevec = timevec[idxarray]
+		# tmp_timevec = timevec[idxarray]
 		tmp_svidvec = f_svid[idxarray]
 		validsats = (satellites != 0 )
 		for each_sat in satellites[validsats]:

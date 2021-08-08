@@ -9,7 +9,7 @@ from scipy.signal import butter, lfilter
 from scipy.signal import freqz
 start_time = time.time()
 
-
+#TODO: WORK ON THIS FUNCTION TO RECEIVE GPS TOWN...
 def sigma_phi_std_filter(filteredphasedata,timevec):
 	"""
 	timevec is carrier phase timestamp in seconds from 0 to 24
@@ -206,7 +206,7 @@ for daystring in daylist:
 	# gnsslist=['00'] # only GPS
 	gnssdic={'00':'GPS','01':'SBS','02':'GAL','03':'BDS','06':'GLO'}
 	gnssname=['GPS','GALILEO','BeiDou','GLONAS']
-	in_fields =['SNR1','SNR2','ELEV','T_TW','AZIM','PHS1','PHS2','TEC']
+	in_fields =['SNR1','SNR2','ELEV','T_TW','AZIM','PHS1','PHS2','PTEC']
 	out_fields=['S401','S402','SIG1','SIG2','ELEV','S_TW','AZIM','NOS1','NOS2','SNR1','SNR2','PTEC','T_TW'] # 1 min resolution # add 1 min TEC
 	sep_fields=['S_S401','S_S402','S_ELEV','S_S_TW']
 
