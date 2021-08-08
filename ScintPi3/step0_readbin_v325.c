@@ -1,5 +1,6 @@
 /* Write and read a binary file (fwrite and fread) */
-
+/*compile: g++ step0_readbin_v325.c -o step0_readbin_v325      */
+/*run: ./step0_readbin_v325 scintpi3_20210807_1200_967663.5625W_329325.2812N_v325.bin*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
