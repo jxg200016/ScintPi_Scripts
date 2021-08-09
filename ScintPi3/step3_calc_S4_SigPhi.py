@@ -9,7 +9,7 @@ from scipy.signal import butter, lfilter
 from scipy.signal import freqz
 start_time = time.time()
 
-#TODO: WORK ON THIS FUNCTION TO RECEIVE GPS TOWN...
+#TODO: Double check, compare with septentrio data
 def sigma_phi_std_filter(filteredphasedata,timevec):
 	"""
 	timevec is carrier phase timestamp in seconds from 0 to 24
@@ -99,16 +99,16 @@ def readingISMR_TOW(SAT,FILENAME):
 				print ('e:',e)
 	return timevec,azit,s4,s42,elev,phi,phi2
 
-def PRN(gnssid,num):
-	if gnssid == '00':
+def PRN(GNSSid,num):
+	if GNSSid == '00':
 		return num
-	elif gnssid == '01':
+	elif GNSSid == '01':
 		return num #same
-	elif gnssid == '02':
+	elif GNSSid == '02':
 		return num+70
-	elif gnssid == '03':
+	elif GNSSid == '03':
 		return num+140
-	elif gnssid == '06':
+	elif GNSSid == '06':
 		if num>0 and num<25:
 			return num+37
 		elif num>24 and num<31:
@@ -156,7 +156,7 @@ def s4_1min_2freq(powerData1,powerData2,timevec,elevaData,azitmData):
 
 	init_index=0
 
-	arr=np.array(timevec)+np.ones([len(timevec)])*(18.0/3600.0) # #SEPTENTRIO USES DATA from 1 MINUTE GPS TIME
+	arr=np.array(timevec)#+np.ones([len(timevec)])*(18.0/3600.0) # #SEPTENTRIO USES DATA from 1 MINUTE GPS TIME
 	########################
 	for eachminute in s4_times:
 		idxarray   = (arr >= eachminute) & (arr < (eachminute+(1/60.0)) )# bool array
@@ -196,15 +196,20 @@ Reading HDF5 file
 # datafolder='/home/jm/Documents/2020.FABLAB/scintpi3SW/rawIQ1470_ismr'
 # daylist = ['20210308','20210309','20210310','20210311']
 datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'
-daylist= ['20210807']
+daylist= ['20210808']
 for daystring in daylist:
 	ismr = False
 	dic={}
 	dic_out={}
 	maxsats=38
 	gnsslist=['00','01','02','03','06']
+	gpslist=[]
+	gallist=[]
+	bdslist=[]
+	sbslist=[]
+	glolist=[]
 	# gnsslist=['00'] # only GPS
-	gnssdic={'00':'GPS','01':'SBS','02':'GAL','03':'BDS','06':'GLO'}
+	gnssdic={'00':['GPS',gpslist],'01':['SBS',sbslist],'02':['GAL',gallist],'03':['BDS',bdslist],'06':['GLO',glolist]}
 	gnssname=['GPS','GALILEO','BeiDou','GLONAS']
 	in_fields =['SNR1','SNR2','ELEV','T_TW','AZIM','PHS1','PHS2','PTEC','CTEC']
 	out_fields=['S401','S402','SIG1','SIG2','ELEV','S_TW','AZIM','NOS1','NOS2','SNR1','SNR2','PTEC','CTEC','T_TW'] # 1 min resolution # add 1 min TEC
@@ -230,10 +235,10 @@ for daystring in daylist:
 					dic_out["%s_%03d_%s"%(GNSSid,sat,field)] =[]
 
 	raw_data_files=[]
-	raw_data_files = glob.glob("%s/sc3_lvl1_%s*.h5"%(datafolder,daystring))
+	raw_data_files = glob.glob("%s/sc3_lvl1_%s*967572*.h5"%(datafolder,daystring))
 	raw_data_files.sort()
 
-	for h5filename in raw_data_files:
+	for h5filename in raw_data_files:#could process all files from different stations
 		file_daystring = h5filename.split('/')[-1].split('_')[2]
 		print ('file_daystring:',file_daystring)
 		# raw_input("checkerrors")
@@ -241,115 +246,122 @@ for daystring in daylist:
 		h5file = h5py.File(h5filename,'r+')
 		for conste in h5file.keys():
 			if conste == 'GPS':
-				gnssid = '00'
+				GNSSid = '00'
 			elif conste == 'SBS':
-				gnssid = '01'
+				GNSSid = '01'
 			elif conste == 'GAL':
-				gnssid = '02'
+				GNSSid = '02'
 			elif conste == 'BDS':
-				gnssid = '03'
+				GNSSid = '03'
 			elif conste == 'GLO':
-				gnssid = '06'
+				GNSSid = '06'
 			groups = h5file.get(conste)
 			for member in groups.items():
 				svid = member[0].replace('SVID','')
+				gnssdic[GNSSid][1].append(int(svid))
 				for each_param in groups.get(member[0]).keys():
-					# print ("%s_%s_%s"%(gnssid,svid,each_param))
-					dic["%s_%s_%s"%(gnssid,svid,each_param)] = groups.get(member[0]).get(each_param)[0]
+					# print ("%s_%s_%s"%(GNSSid,svid,each_param))
+					dic["%s_%s_%s"%(GNSSid,svid,each_param)] = groups.get(member[0]).get(each_param)[0]
 		h5file.close()
 
 
 		for GNSSid in gnsslist:
-			if GNSSid !='01':
-				for eachsat in range(0,maxsats):
-					notempty = len(dic["%s_%03d_T_TW"%(GNSSid,eachsat)])
-					# print (eachsat)
-					if notempty != 0 :
-						#GETTING HIGH RESOLUTION DATA
-						powerDataL1 = dic["%s_%03d_SNR1"%(GNSSid,eachsat)]
-						powerDataL2 = dic["%s_%03d_SNR2"%(GNSSid,eachsat)]
-						# timevec   =   (dic["%s_%03d_T_TW"%(GNSSid,eachsat)]%86400)/86400.0*24.0
-						timevec   =   (dic["%s_%03d_T_TW"%(GNSSid,eachsat)])
-						elevaData =   dic["%s_%03d_ELEV"%(GNSSid,eachsat)]
-						azitmData =   dic["%s_%03d_AZIM"%(GNSSid,eachsat)]
-						dic_out["%s_%03d_CTEC"%(GNSSid,eachsat)] = dic["%s_%03d_CTEC"%(GNSSid,eachsat)]
-						dic_out["%s_%03d_PTEC"%(GNSSid,eachsat)] = dic["%s_%03d_PTEC"%(GNSSid,eachsat)]
-						dic_out["%s_%03d_T_TW"%(GNSSid,eachsat)] = timevec
+			for eachsat in gnssdic[GNSSid][1]:
+				notempty = len(dic["%s_%03d_T_TW"%(GNSSid,eachsat)])
+				print (GNSSid,eachsat)
+				if notempty != 0 :
+					#GETTING HIGH RESOLUTION DATA
+					powerDataL1 = dic["%s_%03d_SNR1"%(GNSSid,eachsat)]
+					powerDataL2 = dic["%s_%03d_SNR2"%(GNSSid,eachsat)]
+					timevec   =   (dic["%s_%03d_T_TW"%(GNSSid,eachsat)]%86400)/86400.0*24.0
+					nday = (dic["%s_%03d_T_TW"%(GNSSid,eachsat)][0]//86400 + dic["%s_%03d_T_TW"%(GNSSid,eachsat)][-1]//86400)//2
+					if timevec[0]>20.0:
+						print("Time error double-check function")
+						input("check for errors...")
 
-						rphase1=np.array(dic["%s_%03d_PHS1"%(GNSSid,eachsat)])
-						rphase2=np.array(dic["%s_%03d_PHS2"%(GNSSid,eachsat)])
+					# timevec   =   (dic["%s_%03d_T_TW"%(GNSSid,eachsat)])
+					elevaData =   dic["%s_%03d_ELEV"%(GNSSid,eachsat)]
+					azitmData =   dic["%s_%03d_AZIM"%(GNSSid,eachsat)]
+					dic_out["%s_%03d_CTEC"%(GNSSid,eachsat)] = dic["%s_%03d_CTEC"%(GNSSid,eachsat)]
+					dic_out["%s_%03d_PTEC"%(GNSSid,eachsat)] = dic["%s_%03d_PTEC"%(GNSSid,eachsat)]
+					dic_out["%s_%03d_T_TW"%(GNSSid,eachsat)] = timevec
+					dic_out["%s_%03d_T_WN"%(GNSSid,eachsat)] = dic["%s_%03d_T_WN"%(GNSSid,eachsat)]
+					dic_out["%s_%03d_S_WN"%(GNSSid,eachsat)] = np.ones((1440))*dic["%s_%03d_T_WN"%(GNSSid,eachsat)][notempty//2]
 
-						init_time = timevec[0]
+					rphase1=np.array(dic["%s_%03d_PHS1"%(GNSSid,eachsat)])
+					rphase2=np.array(dic["%s_%03d_PHS2"%(GNSSid,eachsat)])
 
-						phasedatarad1 = rphase1*2*np.pi
-						phasedatarad2 = rphase2*2*np.pi
+					init_time = timevec[0]
 
-						cutoffsc3 = 1.0 #Cut off 1Hz
-						fs = 10.0
+					phasedatarad1 = rphase1*2*np.pi
+					phasedatarad2 = rphase2*2*np.pi
 
-						fdetrended1 = butter_highpass_filter(phasedatarad1, cutoffsc3, fs, order=6)
-						fdetrended2 = butter_highpass_filter(phasedatarad2, cutoffsc3, fs, order=6)
+					cutoffsc3 = 1.0 #Cut off 1Hz
+					fs = 10.0
 
-						#thresholded detrended by filter
-						threshold=0.5
-						tfdetrended1 = np.where((-threshold<fdetrended1) & (fdetrended1<threshold),fdetrended1,float("nan"))
-						tfdetrended2 = np.where((-threshold<fdetrended2) & (fdetrended2<threshold),fdetrended2,float("nan") )
+					fdetrended1 = butter_highpass_filter(phasedatarad1, cutoffsc3, fs, order=6)
+					fdetrended2 = butter_highpass_filter(phasedatarad2, cutoffsc3, fs, order=6)
 
-						fsigma1R,fsigmtime1R = sigma_phi_std_filter(tfdetrended1,timevec)
-						fsigma2R,fsigmtime2R = sigma_phi_std_filter(tfdetrended2,timevec)
+					#thresholded detrended by filter
+					threshold=0.5
+					tfdetrended1 = np.where((-threshold<fdetrended1) & (fdetrended1<threshold),fdetrended1,float("nan"))
+					tfdetrended2 = np.where((-threshold<fdetrended2) & (fdetrended2<threshold),fdetrended2,float("nan") )
+
+					fsigma1R,fsigmtime1R = sigma_phi_std_filter(tfdetrended1,timevec)
+					fsigma2R,fsigmtime2R = sigma_phi_std_filter(tfdetrended2,timevec)
 
 
-						s4L1_values,s4L2_values,s4_timesr,s4_points1,s4_points2,s4_elev,s4_azit,snr1min,snr2min=s4_1min_2freq(powerDataL1,powerDataL2,timevec,elevaData,azitmData)
-						#WRITTING LOW RESOLUTION DATA
-						dic_out["%s_%03d_S401"%(GNSSid,eachsat)] = s4L1_values
-						dic_out["%s_%03d_S402"%(GNSSid,eachsat)] = s4L2_values
-						dic_out["%s_%03d_SNR1"%(GNSSid,eachsat)] = snr1min
-						dic_out["%s_%03d_SNR2"%(GNSSid,eachsat)] = snr2min
-						dic_out["%s_%03d_NOS1"%(GNSSid,eachsat)] = s4_points1
-						dic_out["%s_%03d_NOS2"%(GNSSid,eachsat)] = s4_points2
-						dic_out["%s_%03d_S_TW"%(GNSSid,eachsat)] = s4_timesr
-						dic_out["%s_%03d_ELEV"%(GNSSid,eachsat)] = s4_elev
-						dic_out["%s_%03d_AZIM"%(GNSSid,eachsat)] = s4_azit
-						dic_out["%s_%03d_SIG1"%(GNSSid,eachsat)] = fsigma1R
-						dic_out["%s_%03d_SIG2"%(GNSSid,eachsat)] = fsigma2R
+					s4L1_values,s4L2_values,s4_timesr,s4_points1,s4_points2,s4_elev,s4_azit,snr1min,snr2min=s4_1min_2freq(powerDataL1,powerDataL2,timevec,elevaData,azitmData)
+					#WRITTING LOW RESOLUTION DATA
+					dic_out["%s_%03d_S401"%(GNSSid,eachsat)] = s4L1_values
+					dic_out["%s_%03d_S402"%(GNSSid,eachsat)] = s4L2_values
+					dic_out["%s_%03d_SNR1"%(GNSSid,eachsat)] = snr1min
+					dic_out["%s_%03d_SNR2"%(GNSSid,eachsat)] = snr2min
+					dic_out["%s_%03d_NOS1"%(GNSSid,eachsat)] = s4_points1
+					dic_out["%s_%03d_NOS2"%(GNSSid,eachsat)] = s4_points2
+					dic_out["%s_%03d_S_TW"%(GNSSid,eachsat)] = np.round(np.array(s4_timesr)/24.0*86400.0 + np.ones(len(s4_timesr))*nday*86400.0)
+					dic_out["%s_%03d_ELEV"%(GNSSid,eachsat)] = s4_elev
+					dic_out["%s_%03d_AZIM"%(GNSSid,eachsat)] = s4_azit
+					dic_out["%s_%03d_SIG1"%(GNSSid,eachsat)] = fsigma1R
+					dic_out["%s_%03d_SIG2"%(GNSSid,eachsat)] = fsigma2R
 
-						if ismr :
-							prn = PRN(GNSSid,eachsat)
-							# ismrtime,azit,s4,s42,elev,ismr_phi1,ismr_phi2=readingISMR(prn)
-							# filename="/home/jm/Documents/2020.FABLAB/scintpi3SW/rawIQ1470_ismr/ljic%s.ismr"%(file_daystring)
-							filename="/home/jm/Documents/2020.FABLAB/scintpi3SW/rawIQ1470_ismr/PALM_%s.ismr"%(file_daystring)
-							ismrtime,azit,ismr_s4_1,ismr_s4_2,elev,ismr_phi1,ismr_phi2=readingISMR_TOW(prn,filename)
-							# complete all the minutes for sigma phi
-							ismrtime_res = [ x%10 for x in ismrtime]
-							zip_object = zip(ismrtime, ismrtime_res)
-							new_ismrtime = []
-							for list1_i, list2_i in zip_object:
-								new_ismrtime.append(list1_i-list2_i)
+					if ismr :
+						prn = PRN(GNSSid,eachsat)
+						# ismrtime,azit,s4,s42,elev,ismr_phi1,ismr_phi2=readingISMR(prn)
+						# filename="/home/jm/Documents/2020.FABLAB/scintpi3SW/rawIQ1470_ismr/ljic%s.ismr"%(file_daystring)
+						filename="/home/jm/Documents/2020.FABLAB/scintpi3SW/rawIQ1470_ismr/PALM_%s.ismr"%(file_daystring)
+						ismrtime,azit,ismr_s4_1,ismr_s4_2,elev,ismr_phi1,ismr_phi2=readingISMR_TOW(prn,filename)
+						# complete all the minutes for sigma phi
+						ismrtime_res = [ x%10 for x in ismrtime]
+						zip_object = zip(ismrtime, ismrtime_res)
+						new_ismrtime = []
+						for list1_i, list2_i in zip_object:
+							new_ismrtime.append(list1_i-list2_i)
 
-							complete_ismr_S4_1 = []
-							complete_ismr_S4_2 = []
-							complete_ismrtime = []
-							complete_ismrelev = []
-							for eachminute in range(0,1440):
-								try :
-									complete_ismr_S4_1.append(ismr_s4_1[new_ismrtime.index(eachminute*60.0)])
-									complete_ismrelev.append(elev[new_ismrtime.index(eachminute*60.0)])#Justo to verify
-								except Exception as e:
-									complete_ismr_S4_1.append(float("nan"))
-									complete_ismrelev.append(float("nan"))
-								try :
-									complete_ismr_S4_2.append(ismr_s4_2[new_ismrtime.index(eachminute*60.0)])
-								except Exception as e:
-									complete_ismr_S4_2.append(float("nan"))
-								complete_ismrtime.append(eachminute*60.0)
+						complete_ismr_S4_1 = []
+						complete_ismr_S4_2 = []
+						complete_ismrtime = []
+						complete_ismrelev = []
+						for eachminute in range(0,1440):
+							try :
+								complete_ismr_S4_1.append(ismr_s4_1[new_ismrtime.index(eachminute*60.0)])
+								complete_ismrelev.append(elev[new_ismrtime.index(eachminute*60.0)])#Justo to verify
+							except Exception as e:
+								complete_ismr_S4_1.append(float("nan"))
+								complete_ismrelev.append(float("nan"))
+							try :
+								complete_ismr_S4_2.append(ismr_s4_2[new_ismrtime.index(eachminute*60.0)])
+							except Exception as e:
+								complete_ismr_S4_2.append(float("nan"))
+							complete_ismrtime.append(eachminute*60.0)
 
-							complete_ismrtime_1to24 = []
-							for eachtime in complete_ismrtime:
-								complete_ismrtime_1to24.append((eachtime%86400)/86400*24)
-							dic_out["%s_%03d_S_S401"%(GNSSid,eachsat)] = complete_ismr_S4_1
-							dic_out["%s_%03d_S_S402"%(GNSSid,eachsat)] = complete_ismr_S4_2 #+ np.ones((len(complete_ismr_phi1)))*(init_time//86400)*86400.0
-							dic_out["%s_%03d_S_ELEV"%(GNSSid,eachsat)] = complete_ismrelev
-							dic_out["%s_%03d_S_S_TW"%(GNSSid,eachsat)] = complete_ismrtime_1to24
+						complete_ismrtime_1to24 = []
+						for eachtime in complete_ismrtime:
+							complete_ismrtime_1to24.append((eachtime%86400)/86400*24)
+						dic_out["%s_%03d_S_S401"%(GNSSid,eachsat)] = complete_ismr_S4_1
+						dic_out["%s_%03d_S_S402"%(GNSSid,eachsat)] = complete_ismr_S4_2 #+ np.ones((len(complete_ismr_phi1)))*(init_time//86400)*86400.0
+						dic_out["%s_%03d_S_ELEV"%(GNSSid,eachsat)] = complete_ismrelev
+						dic_out["%s_%03d_S_S_TW"%(GNSSid,eachsat)] = complete_ismrtime_1to24
 							#
 							# fig = plt.figure(figsize=(14,8)) # ASPECT RATIO 4:3 OR 16:9
 							# ax=fig.add_subplot(2,1,1)
@@ -377,81 +389,29 @@ for daystring in daylist:
 							# ax.legend()
 							# plt.show()
 
-			else :
-				try:
-					sbas_sats=[131,133,136,138]
-					for eachsat in sbas_sats:
-						notempty = len(dic["%s_%03d_T_TW"%(GNSSid,eachsat)])
-						print (eachsat)
-						if notempty != 0 :
-							#GETTING HIGH RESOLUTION DATA
-							powerDataL1 = dic["%s_%03d_SNR1"%(GNSSid,eachsat)]
-							powerDataL2 = dic["%s_%03d_SNR2"%(GNSSid,eachsat)]
-							timevec   =   dic["%s_%03d_T_TW"%(GNSSid,eachsat)]
-							elevaData =   dic["%s_%03d_ELEV"%(GNSSid,eachsat)]
-							azitmData =   dic["%s_%03d_AZIM"%(GNSSid,eachsat)]
-
-							s4L1_values,s4L2_values,s4_timesr,s4_points1,s4_points2,s4_elev,s4_azit,snr1min,snr2min=s4_1min_2freq(powerDataL1,powerDataL2,timevec,elevaData,azitmData)
-							#WRITTING LOW RESOLUTION DATA
-							dic_out["%s_%03d_S401"%(GNSSid,eachsat)] = s4L1_values
-							dic_out["%s_%03d_S402"%(GNSSid,eachsat)] = s4L2_values
-							dic_out["%s_%03d_SNR1"%(GNSSid,eachsat)] = snr1min
-							dic_out["%s_%03d_SNR2"%(GNSSid,eachsat)] = snr2min
-							dic_out["%s_%03d_NOS1"%(GNSSid,eachsat)] = s4_points1
-							dic_out["%s_%03d_NOS2"%(GNSSid,eachsat)] = s4_points2
-							dic_out["%s_%03d_S_TW"%(GNSSid,eachsat)] = s4_timesr
-							dic_out["%s_%03d_ELEV"%(GNSSid,eachsat)] = s4_elev
-							dic_out["%s_%03d_AZIM"%(GNSSid,eachsat)] = s4_azit
-							dic_out["%s_%03d_SIG1"%(GNSSid,eachsat)] = fsigma1R
-							dic_out["%s_%03d_SIG2"%(GNSSid,eachsat)] = fsigma2R
-				except:
-					continue
 
 		h5filename = h5filename.replace('sc3_lvl1','sc3_lvl2')
 		print ("Creating HDF5 file : %s"%(h5filename))
 		fileh5 = h5py.File(h5filename,'w')
 		for GNSSid in gnsslist:
-			group = fileh5.create_group("%s"%(gnssdic[GNSSid]))
-			if GNSSid != '01':
-				for eachsat in range(0,maxsats):
-					rows=len(dic_out["%s_%03d_%s"%(GNSSid,eachsat,'S_TW')])
-					if rows>0:
-						sub_group = fileh5.create_group("/%s/SVID%03d"%(gnssdic[GNSSid],eachsat))
-						for field in out_fields:
-							print ("/%s/SVID%02d-%s"%(gnssdic[GNSSid],eachsat,field))
-							datatype= type(dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)][0])
-							veclengh= len(dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)])
-							dataset = sub_group.create_dataset("%s"%(field), (1,veclengh), dtype =datatype)
-							dataset[...] = dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)]
+			group = fileh5.create_group("%s"%(gnssdic[GNSSid][0]))
+			for eachsat in gnssdic[GNSSid][1]:
+				rows=len(dic_out["%s_%03d_%s"%(GNSSid,eachsat,'S_TW')])
+				if rows>0:
+					sub_group = fileh5.create_group("/%s/SVID%03d"%(gnssdic[GNSSid][0],eachsat))
+					for field in out_fields:
+						print ("/%s/SVID%02d-%s"%(gnssdic[GNSSid][0],eachsat,field))
+						datatype= type(dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)][0])
+						veclengh= len(dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)])
+						dataset = sub_group.create_dataset("%s"%(field), (1,veclengh), dtype =datatype)
+						dataset[...] = dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)]
 
-						rowsSEP=len(dic_out["%s_%03d_%s"%(GNSSid,eachsat,'S_S_TW')])
-						if rowsSEP>0:
-							for field in sep_fields:
-								datatype= type(dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)][0])
-								dataset = sub_group.create_dataset("%s"%(field), (1,rowsSEP), dtype =datatype)
-								dataset[...] = dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)]
-			else :
-				try:
-					sbas_sats=[131,133,136,138]
-					for eachsat in sbas_sats:
-						rows=len(dic_out["%s_%03d_%s"%(GNSSid,eachsat,'S_TW')])
-						if rows>0:
-							sub_group = fileh5.create_group("/%s/SVID%03d"%(gnssdic[GNSSid],eachsat))
-							for field in out_fields:
-								# print ("/%s/SVID%02d-%s"%(gnssdic[GNSSid],eachsat,field))
-								datatype= type(dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)][0])
-								veclengh= len(dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)])
-								dataset = sub_group.create_dataset("%s"%(field), (1,veclengh), dtype =datatype)
-								dataset[...] = dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)]
-					#TODO : SBAS DONT HAVE TEC, HOW EXPORT S4 AND SIGMAPHI?
-							rowsSEP=len(dic_out["%s_%03d_%s"%(GNSSid,eachsat,'S_S_TW')])
-							if rowsSEP>0:
-								for field in sep_fields:
-									datatype= type(dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)][0])
-									dataset = sub_group.create_dataset("%s"%(field), (1,rowsSEP), dtype =datatype)
-									dataset[...] = dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)]
-				except:
-					continue
+					rowsSEP=len(dic_out["%s_%03d_%s"%(GNSSid,eachsat,'S_S_TW')])
+					if rowsSEP>0:
+						for field in sep_fields:
+							datatype= type(dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)][0])
+							dataset = sub_group.create_dataset("%s"%(field), (1,rowsSEP), dtype =datatype)
+							dataset[...] = dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)]
 
 		fileh5.close()
 		print("--- %s seconds ---" % (time.time() - start_time))

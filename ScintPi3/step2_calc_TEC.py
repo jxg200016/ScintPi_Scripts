@@ -45,21 +45,26 @@ Reading HDF5 file
 '''
 datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'
 # daylist= ['20210720']
-daylist=['20210807']
+daylist=['20210808']
 #septentrio sbf files avaliable?
 #v325 will not work until I read tow and week :(
 SEP = False
 for daystring in daylist:
 	raw_data_files=[]
-	raw_data_files = glob.glob("%s/sc3_lvl0_%s_*.h5"%(datafolder,daystring))
+	raw_data_files = glob.glob("%s/sc3_lvl0_%s_*967572*.h5"%(datafolder,daystring))
 	hdf5file = raw_data_files[0].split('/')[-1]
 	print(hdf5file)
 	dic={}
 	sep_dic={}
 	maxsats=38
+	gpslist=[]
+	gallist=[]
+	bdslist=[]
+	sbslist=[]
+	glolist=[]
 	gnsslist=['00','01','02','03','06']
-	gnssdic={'00':'GPS','10':'GPS','01':'SBS','02':'GAL','03':'BDS','06':'GLO'}
-	gnssname=['GPS','GALILEO','BeiDou','GLONAS']
+	gnssdic={'00':['GPS',gpslist],'01':['SBS',sbslist],'02':['GAL',gallist],'03':['BDS',bdslist],'06':['GLO',glolist]}
+	gnssname=['GPS','SBAS','GALILEO','BeiDou','GLONAS']
 	in_fields=['SNR1','SNR2','PHS1','PHS2','ELEV','T_TW','T_WN','AZIM','PSE1','PSE2']
 	out_fields=['SNR1','SNR2','ELEV','T_TW','T_WN','AZIM','PTEC','CTEC','PHS1','PHS2']
 	sep_out_fields=['S_T_TW','S_TEC']
@@ -76,21 +81,22 @@ for daystring in daylist:
 	h5file = h5py.File(h5filename,'r')
 	for conste in h5file.keys():
 		if conste == 'GPS':
-			gnssid = '00'
+			GNSSid = '00'
 		elif conste == 'SBS':
-			gnssid = '01'
+			GNSSid = '01'
 		elif conste == 'GAL':
-			gnssid = '02'
+			GNSSid = '02'
 		elif conste == 'BDS':
-			gnssid = '03'
+			GNSSid = '03'
 		elif conste == 'GLO':
-			gnssid = '06'
+			GNSSid = '06'
 		groups = h5file.get(conste)
 		for member in groups.items():
 			svid = member[0].replace('SVID','')
+			gnssdic[GNSSid][1].append(int(svid))
 			for each_param in groups.get(member[0]).keys():
-				print ("%s_%s_%s"%(gnssid,svid,each_param))
-				dic["%s_%s_%s"%(gnssid,svid,each_param)] = groups.get(member[0]).get(each_param)[0]
+				print ("%s_%s_%s"%(GNSSid,svid,each_param))
+				dic["%s_%s_%s"%(GNSSid,svid,each_param)] = groups.get(member[0]).get(each_param)[0]
 	h5file.close()
 
 	'''
@@ -104,19 +110,20 @@ for daystring in daylist:
 		s_h5file = h5py.File(s_h5filename,'r')
 		for conste in s_h5file.keys():
 			if conste == 'GPS':
-				gnssid = '00'
+				GNSSid = '00'
 			elif conste == 'GAL':
-				gnssid = '02'
+				GNSSid = '02'
 			elif conste == 'BDS':
-				gnssid = '03'
+				GNSSid = '03'
 			elif conste == 'GLO':
-				gnssid = '06'
+				GNSSid = '06'
 			groups = s_h5file.get(conste)
 			for member in groups.items():
 				svid = member[0].replace('SVID','')
+				gnssdic[GNSSid][1].append(int(svid))
 				for each_param in groups.get(member[0]).keys():
-					print ("SEP - %s_%03d_%s"%(gnssid,int(svid),each_param))
-					sep_dic["%s_%03d_%s"%(gnssid,int(svid),each_param)] = groups.get(member[0]).get(each_param)[0]
+					print ("SEP - %s_%03d_%s"%(GNSSid,int(svid),each_param))
+					sep_dic["%s_%03d_%s"%(GNSSid,int(svid),each_param)] = groups.get(member[0]).get(each_param)[0]
 		s_h5file.close()
 
 	'''
@@ -124,7 +131,7 @@ for daystring in daylist:
 	'''
 
 	for GNSSid in gnsslist:
-		for eachsat in range(0,maxsats):
+		for eachsat in gnssdic[GNSSid][1]:
 			notempty = len(dic["%s_%03d_T_TW"%(GNSSid,eachsat)])
 			if notempty != 0 :
 				L1_wlen, L2_wlen = getwavelengths(GNSSid)
@@ -162,13 +169,14 @@ for daystring in daylist:
 	h5filename = h5filename.replace('sc3_lvl0','sc3_lvl1')
 	fileh5 = h5py.File(h5filename,'w')
 	for GNSSid in gnsslist:
-		group = fileh5.create_group("%s"%(gnssdic[GNSSid]))
-		for eachsat in range(1,maxsats):
+		group = fileh5.create_group("%s"%(gnssdic[GNSSid][0]))
+		for eachsat in gnssdic[GNSSid][1]:
+			print (eachsat)
 			rows=len(dic["%s_%03d_%s"%(GNSSid,eachsat,'T_TW')])
 			if rows>0:
-				sub_group = fileh5.create_group("/%s/SVID%03d"%(gnssdic[GNSSid],eachsat))
+				sub_group = fileh5.create_group("/%s/SVID%03d"%(gnssdic[GNSSid][0],eachsat))
 				for field in out_fields:
-					print ("/%s/SVID%03d-%s"%(gnssdic[GNSSid],eachsat,field))
+					print ("/%s/SVID%03d-%s"%(gnssdic[GNSSid][0],eachsat,field))
 					datatype= type(dic["%s_%03d_%s"%(GNSSid,eachsat,field)][0])
 					dataset = sub_group.create_dataset("%s"%(field), (1,rows), dtype =datatype)
 					dataset[...] = dic["%s_%03d_%s"%(GNSSid,eachsat,field)]
@@ -177,7 +185,7 @@ for daystring in daylist:
 					sep_rows=len(sep_dic["%s_%03d_%s"%(GNSSid,eachsat,'S_T_TW')])
 					if sep_rows:
 						for field in sep_out_fields:
-							print ("/%s/SVID%03d-%s"%(gnssdic[GNSSid],eachsat,field))
+							print ("/%s/SVID%03d-%s"%(gnssdic[GNSSid][0],eachsat,field))
 							datatype= type(sep_dic["%s_%03d_%s"%(GNSSid,eachsat,field)][0])
 							dataset = sub_group.create_dataset("%s"%(field), (1,sep_rows), dtype =datatype)
 							dataset[...] = sep_dic["%s_%03d_%s"%(GNSSid,eachsat,field)]

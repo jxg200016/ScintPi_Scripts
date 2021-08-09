@@ -6,25 +6,19 @@ import time
 import h5py #sudo apt-get install python3-h5py
 #TODO : test with data sampled at 25Hz
 '''
-i 4
-f 4
-BBBB 4
-b 1
-i 4
-BBBBBBBBB 9
-dddddd 48
-fff 12
-4+4+4+4+1+9+48+12 = 86
+Requires at least 16GB OF RAM
 '''
 datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'  #where the uncompressed files are located
-daylist=['20210807']
+daylist=['20210808']
+optional= '967572'
+#For 25Hz data takes 12Gb of RAM to convert
 # daylist=['20210801']
 #Be carefull some bin files could be wrong (analize why!)
 sat_fields=['SNR1','SNR2','ELEV','T_TW','T_WN','AZIM','PHS1','PHS2','PSE1','PSE2']#
 gnssdic={0:'GPS',1:'SBS',2:'GAL',3:'BDS',6:'GLO'}
 for daystring in daylist:
 	raw_data_files=[]
-	raw_data_files = glob.glob("%s/scintpi3_%s_*.bin"%(datafolder,daystring))
+	raw_data_files = glob.glob("%s/scintpi3_%s_*967572*.bin"%(datafolder,daystring))
 	underscores=-4#Number of underscores in path +1#this shouldnt change
 	raw_data_files.sort(key=lambda x: x.split('_')[underscores])
 	#Be carefull when we add some _ in the path, for each one add 1 on underscores
