@@ -196,7 +196,7 @@ Reading HDF5 file
 # datafolder='/home/jm/Documents/2020.FABLAB/scintpi3SW/rawIQ1470_ismr'
 # daylist = ['20210308','20210309','20210310','20210311']
 datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'
-daylist= ['20210720']
+daylist= ['20210807']
 for daystring in daylist:
 	ismr = False
 	dic={}
@@ -206,8 +206,8 @@ for daystring in daylist:
 	# gnsslist=['00'] # only GPS
 	gnssdic={'00':'GPS','01':'SBS','02':'GAL','03':'BDS','06':'GLO'}
 	gnssname=['GPS','GALILEO','BeiDou','GLONAS']
-	in_fields =['SNR1','SNR2','ELEV','T_TW','AZIM','PHS1','PHS2','PTEC']
-	out_fields=['S401','S402','SIG1','SIG2','ELEV','S_TW','AZIM','NOS1','NOS2','SNR1','SNR2','PTEC','T_TW'] # 1 min resolution # add 1 min TEC
+	in_fields =['SNR1','SNR2','ELEV','T_TW','AZIM','PHS1','PHS2','PTEC','CTEC']
+	out_fields=['S401','S402','SIG1','SIG2','ELEV','S_TW','AZIM','NOS1','NOS2','SNR1','SNR2','PTEC','CTEC','T_TW'] # 1 min resolution # add 1 min TEC
 	sep_fields=['S_S401','S_S402','S_ELEV','S_S_TW']
 
 	for GNSSid in gnssdic:
@@ -272,7 +272,7 @@ for daystring in daylist:
 						timevec   =   (dic["%s_%03d_T_TW"%(GNSSid,eachsat)])
 						elevaData =   dic["%s_%03d_ELEV"%(GNSSid,eachsat)]
 						azitmData =   dic["%s_%03d_AZIM"%(GNSSid,eachsat)]
-
+						dic_out["%s_%03d_CTEC"%(GNSSid,eachsat)] = dic["%s_%03d_CTEC"%(GNSSid,eachsat)]
 						dic_out["%s_%03d_PTEC"%(GNSSid,eachsat)] = dic["%s_%03d_PTEC"%(GNSSid,eachsat)]
 						dic_out["%s_%03d_T_TW"%(GNSSid,eachsat)] = timevec
 
