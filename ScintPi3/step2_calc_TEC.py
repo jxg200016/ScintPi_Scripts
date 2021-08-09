@@ -3,7 +3,8 @@ import time
 import glob
 import numpy as np
 import matplotlib.pyplot as plt
-#TODO add code tec!
+#TODO CHECK CODE TEC (CTEC is weird...)
+
 '''
 Declaring some functions
 '''
@@ -59,12 +60,12 @@ for daystring in daylist:
 	gnsslist=['00','01','02','03','06']
 	gnssdic={'00':'GPS','10':'GPS','01':'SBS','02':'GAL','03':'BDS','06':'GLO'}
 	gnssname=['GPS','GALILEO','BeiDou','GLONAS']
-	sat_fields=['SNR1','SNR2','PHS1','PHS2','ELEV','T_TW','T_WN','AZIM']
-	out_fields=['SNR1','SNR2','ELEV','T_TW','T_WN','AZIM','PTEC','PHS1','PHS2']
+	in_fields=['SNR1','SNR2','PHS1','PHS2','ELEV','T_TW','T_WN','AZIM','PSE1','PSE2']
+	out_fields=['SNR1','SNR2','ELEV','T_TW','T_WN','AZIM','PTEC','CTEC','PHS1','PHS2']
 	sep_out_fields=['S_T_TW','S_TEC']
 	for GNSSid in gnssdic:
 		for sat in range(0,maxsats):
-			for field in sat_fields:
+			for field in in_fields:
 				dic["%s_%03d_%s"%(GNSSid,sat,field)] =[]
 			for field in sep_out_fields:
 				sep_dic["%s_%03d_%s"%(GNSSid,sat,field)] =[]
@@ -150,6 +151,9 @@ for daystring in daylist:
 				SaveMin = np.nanmin(tec)
 				tec =tec - np.ones(len(tec))*SaveMin
 				dic["%s_%03d_PTEC"%(GNSSid,eachsat)]  = tec
+				cphase1 = dic["%s_%03d_PSE1"%(GNSSid,eachsat)]
+				cphase2 = dic["%s_%03d_PSE2"%(GNSSid,eachsat)]
+				dic["%s_%03d_CTEC"%(GNSSid,eachsat)] = np.subtract(cphase2,cphase1)/0.104
 				#we re-write carrierphases witout jumps
 				dic["%s_%03d_PHS1"%(GNSSid,eachsat)] = rphase1
 				dic["%s_%03d_PHS2"%(GNSSid,eachsat)] = rphase2
