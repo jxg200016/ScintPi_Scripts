@@ -4,26 +4,29 @@ import os
 import numpy as np #sudo apt-get install python3-numpy
 import time
 import h5py #sudo apt-get install python3-h5py
+import optparse
 #TODO : test with data sampled at 25Hz
 '''
 Requires at least 16GB OF RAM
 '''
-datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'  #where the uncompressed files are located
-daylist=['20210808']
-optional= '967572'
+# datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'  #where the uncompressed files are located
+# daylist=['20210808']
 #For 25Hz data takes 12Gb of RAM to convert
 # daylist=['20210801']
 #Be carefull some bin files could be wrong (analize why!)
-sat_fields=['SNR1','SNR2','ELEV','T_TW','T_WN','AZIM','PHS1','PHS2','PSE1','PSE2']#
-gnssdic={0:'GPS',1:'SBS',2:'GAL',3:'BDS',6:'GLO'}
-for daystring in daylist:
-	raw_data_files=[]
-	raw_data_files = glob.glob("%s/scintpi3_%s_*967572*.bin"%(datafolder,daystring))
-	underscores=-4#Number of underscores in path +1#this shouldnt change
-	raw_data_files.sort(key=lambda x: x.split('_')[underscores])
+def get_comma_separated_args(option, opt, value, parser):
+	setattr(parser.values, option.dest, value.split(','))
+
+def main(raw_data_files):
+	sat_fields=['SNR1','SNR2','ELEV','T_TW','T_WN','AZIM','PHS1','PHS2','PSE1','PSE2']#
+	gnssdic={0:'GPS',1:'SBS',2:'GAL',3:'BDS',6:'GLO'}
+
+	# raw_data_files.sort(key=lambda x: x.split('_')[-4])
 	#Be carefull when we add some _ in the path, for each one add 1 on underscores
 	if len(raw_data_files) == 0 :
-		raw_input("No files on path.")
+		print("No files on path.")
+		# print("Try: W10: python wherever\myscript\is\step1_ReadRawData_v325.py -p C:\Users\JmGomezs\Documents\Scintpi\data(quotes) ")
+		return 0
 	dic={}
 	f_week = np.zeros(shape=(1), dtype=np.int32)
 	f_towe = np.zeros(shape=(1), dtype=np.float32)
@@ -207,3 +210,20 @@ for daystring in daylist:
 
 	print("--- %s seconds ---" % (time.time() - start_time))
 	fileh5.close()
+if __name__=="__main__":
+	parser = optparse.OptionParser()
+	parser.add_option('-p',"--path",dest='datapath',type="string",default="~/Documents/")
+	parser.add_option('-d',"--day", dest='daystring',type="string",default="20210808")
+	parser.add_option('-f', '--files',
+                  type='string',
+                  action='callback',
+                  callback=get_comma_separated_args,
+                  dest = 'files_args_list')
+	(op, args) = parser.parse_args()
+	# print ("op.foo_args_list:", op.foo_args_list)
+	# main(op.datapath,op.daystring)
+	main(op.foo_args_list)
+'''
+run :
+python C:\Users\JmGomezs\Documents\ScintPi_Scripts\ScintPi3\step1_ReadRawData_v325.py -p C:\Users\JmGomezs\Documents\Scintpi\data\ -f 1,2,3,4
+'''
