@@ -202,11 +202,13 @@ def main(raw_data_files):
 			#wtf?
 			print (each_sat)
 			sub_group = fileh5.create_group("/%s/SVID%03d"%(gnssdic[GNSSid],each_sat))
-			for field in sat_fields:
-				print ("/%s/SVID%03d_%s"%(gnssdic[GNSSid],each_sat,field))
-				datatype= type(dic["%02d_%03d_%s"%(GNSSid,each_sat,field)][0])
-				dataset = sub_group.create_dataset("%s"%(field), (1,rows), dtype =datatype)
-				dataset[...] = dic["%02d_%03d_%s"%(GNSSid,each_sat,field)]
+			#5 minutes * 60 sec * 20 samples per second = 
+			if len(dic["%02d_%03d_%s"%(GNSSid,each_sat,'T_TW')]) > 5*60*20 : #only if we have at least 5 minutes of data
+				for field in sat_fields:
+					print ("/%s/SVID%03d_%s"%(gnssdic[GNSSid],each_sat,field))
+					datatype= type(dic["%02d_%03d_%s"%(GNSSid,each_sat,field)][0])
+					dataset = sub_group.create_dataset("%s"%(field), (1,rows), dtype =datatype)
+					dataset[...] = dic["%02d_%03d_%s"%(GNSSid,each_sat,field)]
 
 	print("--- %s seconds ---" % (time.time() - start_time))
 	fileh5.close()
