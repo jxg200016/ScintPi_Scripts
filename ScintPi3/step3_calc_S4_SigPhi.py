@@ -7,6 +7,7 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 from scipy.signal import butter, lfilter
 from scipy.signal import freqz
+import optparse
 start_time = time.time()
 
 #TODO: Double check, compare with septentrio data
@@ -193,11 +194,9 @@ def s4_1min_2freq(powerData1,powerData2,timevec,elevaData,azitmData):
 '''
 Reading HDF5 file
 '''
-# datafolder='/home/jm/Documents/2020.FABLAB/scintpi3SW/rawIQ1470_ismr'
-# daylist = ['20210308','20210309','20210310','20210311']
-datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'
-daylist= ['20210808']
-for daystring in daylist:
+# datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'
+# daylist= ['20210808']
+def main(datafolder,daystring):
 	ismr = False
 	dic={}
 	dic_out={}
@@ -235,7 +234,7 @@ for daystring in daylist:
 					dic_out["%s_%03d_%s"%(GNSSid,sat,field)] =[]
 
 	raw_data_files=[]
-	raw_data_files = glob.glob("%s/sc3_lvl1_%s*967572*.h5"%(datafolder,daystring))
+	raw_data_files = glob.glob("%s/sc3_lvl1_%s*.h5"%(datafolder,daystring))
 	raw_data_files.sort()
 
 	for h5filename in raw_data_files:#could process all files from different stations
@@ -319,7 +318,7 @@ for daystring in daylist:
 					dic_out["%s_%03d_SNR2"%(GNSSid,eachsat)] = snr2min
 					dic_out["%s_%03d_NOS1"%(GNSSid,eachsat)] = s4_points1
 					dic_out["%s_%03d_NOS2"%(GNSSid,eachsat)] = s4_points2
-					dic_out["%s_%03d_S_TW"%(GNSSid,eachsat)] = np.round(np.array(s4_timesr)/24.0*86400.0 + np.ones(len(s4_timesr))*nday*86400.0)
+					dic_out["%s_%03d_S_TW"%(GNSSid,eachsat)] = np.round(np.array(s4_timesr)/24.0*86400.0 + np.ones(len(s4_timesr))*nday*86400.0)#TODO CHECK IT LATER 18 SEC
 					dic_out["%s_%03d_ELEV"%(GNSSid,eachsat)] = s4_elev
 					dic_out["%s_%03d_AZIM"%(GNSSid,eachsat)] = s4_azit
 					dic_out["%s_%03d_SIG1"%(GNSSid,eachsat)] = fsigma1R
@@ -415,3 +414,10 @@ for daystring in daylist:
 
 		fileh5.close()
 		print("--- %s seconds ---" % (time.time() - start_time))
+
+if __name__=="__main__":
+	parser = optparse.OptionParser()
+	parser.add_option('-p',"--path",dest='datapath',type="string",default="~/Documents/")
+	parser.add_option('-d',"--day", dest='daystring',type="string",default="20210808")
+	(op, args) = parser.parse_args()
+	main(op.datapath,op.daystring)
