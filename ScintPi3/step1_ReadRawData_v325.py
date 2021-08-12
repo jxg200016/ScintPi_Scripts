@@ -222,8 +222,4 @@ if __name__=="__main__":
 	(op, args) = parser.parse_args()
 	# print ("op.foo_args_list:", op.foo_args_list)
 	# main(op.datapath,op.daystring)
-	main(op.foo_args_list)
-'''
-run :
-python C:\Users\JmGomezs\Documents\ScintPi_Scripts\ScintPi3\step1_ReadRawData_v325.py -p C:\Users\JmGomezs\Documents\Scintpi\data\ -f 1,2,3,4
-'''
+	main(op.files_args_list)
