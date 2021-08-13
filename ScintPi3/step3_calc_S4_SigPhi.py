@@ -274,10 +274,6 @@ def main(datafolder,daystring):
 					powerDataL2 = dic["%s_%03d_SNR2"%(GNSSid,eachsat)]
 					timevec   =   (dic["%s_%03d_T_TW"%(GNSSid,eachsat)]%86400)/86400.0*24.0
 					nday = (dic["%s_%03d_T_TW"%(GNSSid,eachsat)][0]//86400 + dic["%s_%03d_T_TW"%(GNSSid,eachsat)][-1]//86400)//2
-					if timevec[0]>20.0:
-						print("Time error double-check function")
-						input("check for errors...")
-
 					# timevec   =   (dic["%s_%03d_T_TW"%(GNSSid,eachsat)])
 					elevaData =   dic["%s_%03d_ELEV"%(GNSSid,eachsat)]
 					azitmData =   dic["%s_%03d_AZIM"%(GNSSid,eachsat)]
