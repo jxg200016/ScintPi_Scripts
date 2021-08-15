@@ -210,8 +210,8 @@ def main(datafolder,daystring):
 	# gnsslist=['00'] # only GPS
 	gnssdic={'00':['GPS',gpslist],'01':['SBS',sbslist],'02':['GAL',gallist],'03':['BDS',bdslist],'06':['GLO',glolist]}
 	gnssname=['GPS','GALILEO','BeiDou','GLONAS']
-	in_fields =['SNR1','SNR2','ELEV','T_TW','AZIM','PHS1','PHS2','PTEC','CTEC']
-	out_fields=['S401','S402','SIG1','SIG2','ELEV','S_TW','AZIM','NOS1','NOS2','SNR1','SNR2','PTEC','CTEC','T_TW'] # 1 min resolution # add 1 min TEC
+	in_fields =['SNR1','SNR2','ELEV','T_TW','T_WN','AZIM','PHS1','PHS2','PTEC','CTEC']
+	out_fields=['S401','S402','SIG1','SIG2','ELEV','S_TW','S_WN','AZIM','NOS1','NOS2','SNR1','SNR2','PTEC','CTEC','T_TW','T_WN'] # 1 min resolution # add 1 min TEC
 	sep_fields=['S_S401','S_S402','S_ELEV','S_S_TW']
 
 	for GNSSid in gnssdic:
