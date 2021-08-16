@@ -11,6 +11,7 @@ import optparse
 start_time = time.time()
 
 #TODO: Double check, compare with septentrio data
+#TODO: Double check, when there are two satellite pass.
 def sigma_phi_std_filter(filteredphasedata,timevec):
 	"""
 	timevec is carrier phase timestamp in seconds from 0 to 24
@@ -197,51 +198,52 @@ Reading HDF5 file
 # datafolder=r'C:\Users\JmGomezs\Documents\Scintpi\data'
 # daylist= ['20210808']
 def main(datafolder,daystring):
-	ismr = False
-	dic={}
-	dic_out={}
-	maxsats=38
-	gnsslist=['00','01','02','03','06']
-	gpslist=[]
-	gallist=[]
-	bdslist=[]
-	sbslist=[]
-	glolist=[]
-	# gnsslist=['00'] # only GPS
-	gnssdic={'00':['GPS',gpslist],'01':['SBS',sbslist],'02':['GAL',gallist],'03':['BDS',bdslist],'06':['GLO',glolist]}
-	gnssname=['GPS','GALILEO','BeiDou','GLONAS']
-	in_fields =['SNR1','SNR2','ELEV','T_TW','T_WN','AZIM','PHS1','PHS2','PTEC','CTEC']
-	out_fields=['S401','S402','SIG1','SIG2','ELEV','S_TW','S_WN','AZIM','NOS1','NOS2','SNR1','SNR2','PTEC','CTEC','T_TW','T_WN'] # 1 min resolution # add 1 min TEC
-	sep_fields=['S_S401','S_S402','S_ELEV','S_S_TW']
-
-	for GNSSid in gnssdic:
-		if GNSSid != '01':
-			for sat in range(0,maxsats):
-				for field in in_fields:
-					dic["%s_%03d_%s"%(GNSSid,sat,field)] =[]
-				for field in out_fields:
-					dic_out["%s_%03d_%s"%(GNSSid,sat,field)] =[]
-				for field in sep_fields:
-					dic_out["%s_%03d_%s"%(GNSSid,sat,field)] =[]
-		else :
-			sbas_list=[131,133,136,138]
-			for sat in sbas_list:
-				for field in in_fields:
-					dic["%s_%03d_%s"%(GNSSid,sat,field)] =[]
-				for field in out_fields:
-					dic_out["%s_%03d_%s"%(GNSSid,sat,field)] =[]
-				for field in sep_fields:
-					dic_out["%s_%03d_%s"%(GNSSid,sat,field)] =[]
-
 	raw_data_files=[]
 	raw_data_files = glob.glob("%s/sc3_lvl1_%s*.h5"%(datafolder,daystring))
 	raw_data_files.sort()
 
 	for h5filename in raw_data_files:#could process all files from different stations
 		file_daystring = h5filename.split('/')[-1].split('_')[2]
+
+		ismr = False
+		dic={}
+		dic_out={}
+		maxsats=38
+		gnsslist=['00','01','02','03','06']
+		gpslist=[]
+		gallist=[]
+		bdslist=[]
+		sbslist=[]
+		glolist=[]
+		# gnsslist=['00'] # only GPS
+		gnssdic={'00':['GPS',gpslist],'01':['SBS',sbslist],'02':['GAL',gallist],'03':['BDS',bdslist],'06':['GLO',glolist]}
+		in_fields =['SNR1','SNR2','ELEV','T_TW','T_WN','AZIM','PHS1','PHS2','PTEC','CTEC']
+		out_fields=['S401','S402','SIG1','SIG2','ELEV','S_TW','S_WN','AZIM','NOS1','NOS2','SNR1','SNR2','PTEC','CTEC','T_TW','T_WN'] # 1 min resolution # add 1 min TEC
+		sep_fields=['S_S401','S_S402','S_ELEV','S_S_TW']
+
+		for GNSSid in gnssdic:
+			if GNSSid != '01':
+				for sat in range(0,maxsats):
+					for field in in_fields:
+						dic["%s_%03d_%s"%(GNSSid,sat,field)] =[]
+					for field in out_fields:
+						dic_out["%s_%03d_%s"%(GNSSid,sat,field)] =[]
+					for field in sep_fields:
+						dic_out["%s_%03d_%s"%(GNSSid,sat,field)] =[]
+			else :
+				sbas_list=[131,133,136,138]
+				for sat in sbas_list:
+					for field in in_fields:
+						dic["%s_%03d_%s"%(GNSSid,sat,field)] =[]
+					for field in out_fields:
+						dic_out["%s_%03d_%s"%(GNSSid,sat,field)] =[]
+					for field in sep_fields:
+						dic_out["%s_%03d_%s"%(GNSSid,sat,field)] =[]
+
+
 		print ('file_daystring:',file_daystring)
-		# raw_input("checkerrors")
 		print ("Reading %s file"%(h5filename))
+		input("checkerrors")
 		h5file = h5py.File(h5filename,'r+')
 		for conste in h5file.keys():
 			if conste == 'GPS':
@@ -267,7 +269,7 @@ def main(datafolder,daystring):
 		for GNSSid in gnsslist:
 			for eachsat in gnssdic[GNSSid][1]:
 				notempty = len(dic["%s_%03d_T_TW"%(GNSSid,eachsat)])
-				print (GNSSid,eachsat)
+				print (GNSSid,eachsat,notempty)
 				if notempty != 0 :
 					#GETTING HIGH RESOLUTION DATA
 					powerDataL1 = dic["%s_%03d_SNR1"%(GNSSid,eachsat)]
@@ -384,22 +386,25 @@ def main(datafolder,daystring):
 							# ax.legend()
 							# plt.show()
 
-
 		h5filename = h5filename.replace('sc3_lvl1','sc3_lvl2')
 		print ("Creating HDF5 file : %s"%(h5filename))
 		fileh5 = h5py.File(h5filename,'w')
 		for GNSSid in gnsslist:
+			print (GNSSid)
+			print ("%s"%(gnssdic[GNSSid][0]))
 			group = fileh5.create_group("%s"%(gnssdic[GNSSid][0]))
 			for eachsat in gnssdic[GNSSid][1]:
 				rows=len(dic_out["%s_%03d_%s"%(GNSSid,eachsat,'S_TW')])
 				if rows>0:
+					print ("/%s/SVID%03d"%(gnssdic[GNSSid][0],eachsat))
 					sub_group = fileh5.create_group("/%s/SVID%03d"%(gnssdic[GNSSid][0],eachsat))
 					for field in out_fields:
-						print ("/%s/SVID%02d-%s"%(gnssdic[GNSSid][0],eachsat,field))
+
 						datatype= type(dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)][0])
 						veclengh= len(dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)])
 						dataset = sub_group.create_dataset("%s"%(field), (1,veclengh), dtype =datatype)
 						dataset[...] = dic_out["%s_%03d_%s"%(GNSSid,eachsat,field)]
+						print ("/%s/SVID%03d-%s"%(gnssdic[GNSSid][0],eachsat,field))
 
 					rowsSEP=len(dic_out["%s_%03d_%s"%(GNSSid,eachsat,'S_S_TW')])
 					if rowsSEP>0:
