@@ -243,7 +243,6 @@ def main(datafolder,daystring):
 
 		print ('file_daystring:',file_daystring)
 		print ("Reading %s file"%(h5filename))
-		input("checkerrors")
 		h5file = h5py.File(h5filename,'r+')
 		for conste in h5file.keys():
 			if conste == 'GPS':
@@ -281,7 +280,7 @@ def main(datafolder,daystring):
 					azitmData =   dic["%s_%03d_AZIM"%(GNSSid,eachsat)]
 					dic_out["%s_%03d_CTEC"%(GNSSid,eachsat)] = dic["%s_%03d_CTEC"%(GNSSid,eachsat)]
 					dic_out["%s_%03d_PTEC"%(GNSSid,eachsat)] = dic["%s_%03d_PTEC"%(GNSSid,eachsat)]
-					dic_out["%s_%03d_T_TW"%(GNSSid,eachsat)] = timevec
+					dic_out["%s_%03d_T_TW"%(GNSSid,eachsat)] = dic["%s_%03d_T_TW"%(GNSSid,eachsat)]
 					dic_out["%s_%03d_T_WN"%(GNSSid,eachsat)] = dic["%s_%03d_T_WN"%(GNSSid,eachsat)]
 					dic_out["%s_%03d_S_WN"%(GNSSid,eachsat)] = np.ones((1440))*dic["%s_%03d_T_WN"%(GNSSid,eachsat)][notempty//2]
 
@@ -354,7 +353,7 @@ def main(datafolder,daystring):
 
 						complete_ismrtime_1to24 = []
 						for eachtime in complete_ismrtime:
-							complete_ismrtime_1to24.append((eachtime%86400)/86400*24)
+							complete_ismrtime_1to24.append((eachtime%86400)/86400.0*24.0)
 						dic_out["%s_%03d_S_S401"%(GNSSid,eachsat)] = complete_ismr_S4_1
 						dic_out["%s_%03d_S_S402"%(GNSSid,eachsat)] = complete_ismr_S4_2 #+ np.ones((len(complete_ismr_phi1)))*(init_time//86400)*86400.0
 						dic_out["%s_%03d_S_ELEV"%(GNSSid,eachsat)] = complete_ismrelev
