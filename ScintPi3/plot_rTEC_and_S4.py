@@ -11,7 +11,7 @@ import numpy
 from datetime import datetime
 from matplotlib import pyplot
 import matplotlib.dates as mdates
-from matplotlib.ticker import AutoMinorLocator, MultipleLocator
+# from matplotlib.ticker import AutoMinorLocator, MultipleLocator
 import optparse
 import glob
 start_time = time.time()
