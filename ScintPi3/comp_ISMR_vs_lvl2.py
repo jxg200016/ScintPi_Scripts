@@ -76,7 +76,7 @@ glolist=[]
 # gnsslist=['00'] # only GPS
 gnssdic={'00':['GPS',gpslist],'01':['SBS',sbslist],'02':['GAL',gallist],'03':['BDS',bdslist],'06':['GLO',glolist]}
 
-h5filename='//UARS_NAS01/scintpi3_data/sc000/proc/sc3_lvl2_20210825_0002_967573.3125W_329918.3438N_v325.h5'
+h5filename='//UARS_NAS01/scintpi3_data/sc004/proc/sc3_lvl2_20210829_0001_967572.6875W_329918.2812N_v325.h5'
 print ("Reading %s file"%(h5filename))
 h5file = h5py.File(h5filename,'r+')
 for conste in h5file.keys():

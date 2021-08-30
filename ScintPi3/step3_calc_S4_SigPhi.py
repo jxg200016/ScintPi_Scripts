@@ -274,6 +274,11 @@ def main(datafolder,daystring):
 					powerDataL1 = dic["%s_%03d_SNR1"%(GNSSid,eachsat)]
 					powerDataL2 = dic["%s_%03d_SNR2"%(GNSSid,eachsat)]
 					timevec   =   (dic["%s_%03d_T_TW"%(GNSSid,eachsat)]%86400)/86400.0*24.0
+					a = np.diff(dic["%s_%03d_T_TW"%(GNSSid,eachsat)])
+					b = np.around(a, decimals=2)
+					c,counts = np.unique(b, return_counts=True)
+					period = c[np.argmax(counts)]
+					#in order to get fsampling, dif(time),round 2 decimals, unique, max(unique)
 					nday = (dic["%s_%03d_T_TW"%(GNSSid,eachsat)][0]//86400 + dic["%s_%03d_T_TW"%(GNSSid,eachsat)][-1]//86400)//2
 					elevaData =   dic["%s_%03d_ELEV"%(GNSSid,eachsat)]
 					azitmData =   dic["%s_%03d_AZIM"%(GNSSid,eachsat)]
@@ -292,7 +297,7 @@ def main(datafolder,daystring):
 					phasedatarad2 = rphase2*2*np.pi
 
 					cutoffsc3 = 1.0 #Cut off 1Hz
-					fs = 10.0 #TODO not always is 10Hz
+					fs = 1.0/period #TODO not always is 10Hz
 
 					fdetrended1 = butter_highpass_filter(phasedatarad1, cutoffsc3, fs, order=6)
 					fdetrended2 = butter_highpass_filter(phasedatarad2, cutoffsc3, fs, order=6)
@@ -416,7 +421,7 @@ def main(datafolder,daystring):
 
 if __name__=="__main__":
 	parser = optparse.OptionParser()
-	parser.add_option('-p',"--path",dest='datapath',type="string",default=r'\\UARS_NAS01\scintpi3_data\sc000\proc')
-	parser.add_option('-d',"--day", dest='daystring',type="string",default="20210826")
+	parser.add_option('-p',"--path",dest='datapath',type="string",default=r'\\UARS_NAS01\scintpi3_data\sc004\proc')
+	parser.add_option('-d',"--day", dest='daystring',type="string",default="20210829")
 	(op, args) = parser.parse_args()
 	main(op.datapath,op.daystring)
