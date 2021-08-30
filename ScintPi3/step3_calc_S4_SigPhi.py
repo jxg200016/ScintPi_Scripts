@@ -27,9 +27,9 @@ def sigma_phi_std_filter(filteredphasedata,timevec):
 	arr=np.array(timevec)
 	for eachminute in times:
 		# print (eachminute,eachminute+60 )
-		idxarray   = (arr >= eachminute) & (arr < (eachminute+(1/60) ) ) # bool array
-		# print ("len(idxarray):",timevec[idxarray])
+		idxarray   = (arr >= eachminute) & (arr < (eachminute+(1/60.0) ) ) # bool array
 		if len(timevec[idxarray])>0:
+			# print ("len(idxarray):",len(timevec[idxarray]) )
 			tmp_time = timevec[idxarray]
 			phasedatafil = filteredphasedata[idxarray]
 			if len(timevec[idxarray])>500:
@@ -39,7 +39,7 @@ def sigma_phi_std_filter(filteredphasedata,timevec):
 				sigmaPhiList.append(float("nan"))
 		else :
 			sigmaPhiList.append(float("nan"))
-		sigmaPhitime.append(eachminute+(1/60))
+		sigmaPhitime.append(eachminute+(1/60.0))
 	return sigmaPhiList,sigmaPhitime
 
 def butter_highpass(cutoff, fs, order=6):
@@ -166,10 +166,10 @@ def s4_1min_2freq(powerData1,powerData2,timevec,elevaData,azitmData):
 		tmp_amplitudesdB2 = powerData2[idxarray]
 		tmp_elevations   = elevaData[idxarray]
 		tmp_azimuths     = azitmData[idxarray]
-		tmp_amplitudes1=list(map(pow10,tmp_amplitudesdB1))#use numpy.power
-		tmp_amplitudes2=list(map(pow10,tmp_amplitudesdB2))
-
-
+		tmp_amplitudes1=np.power(10,np.array(tmp_amplitudesdB1)/10.0)
+		tmp_amplitudes2=np.power(10,np.array(tmp_amplitudesdB2)/10.0)
+		# tmp_amplitudes1=list(map(pow10,tmp_amplitudesdB1))#use numpy.power
+		# tmp_amplitudes2=list(map(pow10,tmp_amplitudesdB2))
 		if len(tmp_amplitudes1)>0:
 			s4_1 = np.std(tmp_amplitudes1,ddof=1) / np.mean(tmp_amplitudes1)
 		else:
@@ -275,7 +275,6 @@ def main(datafolder,daystring):
 					powerDataL2 = dic["%s_%03d_SNR2"%(GNSSid,eachsat)]
 					timevec   =   (dic["%s_%03d_T_TW"%(GNSSid,eachsat)]%86400)/86400.0*24.0
 					nday = (dic["%s_%03d_T_TW"%(GNSSid,eachsat)][0]//86400 + dic["%s_%03d_T_TW"%(GNSSid,eachsat)][-1]//86400)//2
-					# timevec   =   (dic["%s_%03d_T_TW"%(GNSSid,eachsat)])
 					elevaData =   dic["%s_%03d_ELEV"%(GNSSid,eachsat)]
 					azitmData =   dic["%s_%03d_AZIM"%(GNSSid,eachsat)]
 					dic_out["%s_%03d_CTEC"%(GNSSid,eachsat)] = dic["%s_%03d_CTEC"%(GNSSid,eachsat)]
@@ -293,7 +292,7 @@ def main(datafolder,daystring):
 					phasedatarad2 = rphase2*2*np.pi
 
 					cutoffsc3 = 1.0 #Cut off 1Hz
-					fs = 10.0
+					fs = 10.0 #TODO not always is 10Hz
 
 					fdetrended1 = butter_highpass_filter(phasedatarad1, cutoffsc3, fs, order=6)
 					fdetrended2 = butter_highpass_filter(phasedatarad2, cutoffsc3, fs, order=6)
@@ -417,7 +416,7 @@ def main(datafolder,daystring):
 
 if __name__=="__main__":
 	parser = optparse.OptionParser()
-	parser.add_option('-p',"--path",dest='datapath',type="string",default="~/Documents/")
-	parser.add_option('-d',"--day", dest='daystring',type="string",default="20210808")
+	parser.add_option('-p',"--path",dest='datapath',type="string",default=r'\\UARS_NAS01\scintpi3_data\sc000\proc')
+	parser.add_option('-d',"--day", dest='daystring',type="string",default="20210826")
 	(op, args) = parser.parse_args()
 	main(op.datapath,op.daystring)

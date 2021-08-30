@@ -202,7 +202,7 @@ def main(raw_data_files):
 			#wtf?
 			print (each_sat)
 			sub_group = fileh5.create_group("/%s/SVID%03d"%(gnssdic[GNSSid],each_sat))
-			#5 minutes * 60 sec * 20 samples per second = 
+			#5 minutes * 60 sec * 20 samples per second =
 			if len(dic["%02d_%03d_%s"%(GNSSid,each_sat,'T_TW')]) > 5*60*20 : #only if we have at least 5 minutes of data
 				for field in sat_fields:
 					print ("/%s/SVID%03d_%s"%(gnssdic[GNSSid],each_sat,field))
@@ -214,8 +214,8 @@ def main(raw_data_files):
 	fileh5.close()
 if __name__=="__main__":
 	parser = optparse.OptionParser()
-	parser.add_option('-p',"--path",dest='datapath',type="string",default="~/Documents/")
-	parser.add_option('-d',"--day", dest='daystring',type="string",default="20210808")
+	parser.add_option('-p',"--path",dest='datapath',type="string",default=r'C:\Users\JmGomezs\Documents\Scintpi\data')
+	parser.add_option('-d',"--day", dest='daystring',type="string",default="20210825")
 	parser.add_option('-f', '--files',
                   type='string',
                   action='callback',
