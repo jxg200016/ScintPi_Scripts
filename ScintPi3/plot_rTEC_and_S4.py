@@ -114,6 +114,13 @@ def main(datafolder,daystring):
 						SC3_ELEV =  dic["%s_%03d_ELEV"%(GNSSid,eachsat)][:-1]
 						SC3_S401 =  dic["%s_%03d_S401"%(GNSSid,eachsat)][:-1]*30.0
 
+						SC3_TTIME_DIFF = numpy.diff(SC3_TTIME)
+						for timex in range(0,2):
+							SC3_TTIME[numpy.argmax(SC3_TTIME_DIFF)-1]=float("nan")
+							SC3_TTIME[numpy.argmax(SC3_TTIME_DIFF)]=float("nan")
+							SC3_TTIME_DIFF[numpy.argmax(SC3_TTIME_DIFF)] = 0
+
+
 						texttime = 1
 
 			#             axs[each_row, each_col].plot(SC3_TIME, SC3_SNR_1,'-',color='#d62728',linewidth=0.5)
@@ -132,7 +139,7 @@ def main(datafolder,daystring):
 							axs[each_row, each_col].grid(True,which='minor',linestyle='--',linewidth=0.1)
 							axs[each_row, each_col].grid(True,which='major',linestyle='--',linewidth=0.4)
 							axs[each_row, each_col].set_yticks(numpy.arange(0, 30.1, step=6))  # Set label locations
-							axs2.set_yticks(numpy.arange(0, 90.1, step=9))  # Set label locations
+							axs2.set_yticks(numpy.arange(0, 90.1, step=18))  # Set label locations
 							axs[each_row, each_col].tick_params(axis='y',which='major', width=0.7, labelsize=5)#X and y labels font size
 							axs2.tick_params(axis='y',which='major', width=0.7, labelsize=5)#X and y labels font size
 							axs[each_row, each_col].set_xticks(numpy.arange(0, 24.1, step=3))  # Set label locations
@@ -143,7 +150,7 @@ def main(datafolder,daystring):
 							axs[each_row, each_col].set_xlabel('Universal Time', fontsize = 7)
 							axs[each_row, each_col].set_xticks(numpy.arange(0, 24.1, step=3))  # Set label locations
 							axs[each_row, each_col].set_yticks(numpy.arange(0, 30.1, step=6))  # Set label locations.
-							axs2.set_yticks(numpy.arange(0, 90.1, step=9))  # Set label locations
+							axs2.set_yticks(numpy.arange(0, 90.1, step=18))  # Set label locations
 							axs[each_row, each_col].grid(True,which='minor',linestyle='--',linewidth=0.1)
 							axs[each_row, each_col].grid(True,which='major',linestyle='--',linewidth=0.4)
 							axs[each_row, each_col].tick_params(axis='x',which='major', width=0.7, labelsize=5)#X and y labels
@@ -153,7 +160,7 @@ def main(datafolder,daystring):
 						else:
 							axs[each_row, each_col].set_xticks(numpy.arange(0, 24.1, step=3))  # Set label locations
 							axs[each_row, each_col].set_yticks(numpy.arange(0, 30.1, step=6))  # Set label locations.
-							axs2.set_yticks(numpy.arange(0, 90.1, step=9))  # Set label locations
+							axs2.set_yticks(numpy.arange(0, 90.1, step=18))  # Set label locations
 							axs2.tick_params(axis='y',which='major', width=0.7, labelsize=5)
 							axs[each_row, each_col].grid(True,which='minor',linestyle='--',linewidth=0.1)
 							axs[each_row, each_col].grid(True,which='major',linestyle='--',linewidth=0.4)
