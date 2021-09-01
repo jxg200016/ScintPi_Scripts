@@ -135,7 +135,7 @@ def main(datafolder,daystring):
 						axs[each_row, each_col].text(texttime,22,sc2_coid,fontsize=7,weight='bold')
 
 						if each_col == 0:
-							axs[each_row, each_col].set_ylabel('rTEC', fontsize = 7)
+							axs[each_row, each_col].set_ylabel('rTEC&S4*30', fontsize = 7)
 							axs[each_row, each_col].grid(True,which='minor',linestyle='--',linewidth=0.1)
 							axs[each_row, each_col].grid(True,which='major',linestyle='--',linewidth=0.4)
 							axs[each_row, each_col].set_yticks(numpy.arange(0, 30.1, step=6))  # Set label locations
