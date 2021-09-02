@@ -31,6 +31,8 @@ def main(datafolder,daystring):
 		for h5filename in raw_data_files:#could process all files from different stations
 			dic={}
 			gnsslist=['00','01','02','03','06']
+			full_S401 = []
+			full_TIME = []
 			gpslist=[]
 			gallist=[]
 			bdslist=[]
@@ -86,6 +88,7 @@ def main(datafolder,daystring):
 			maxcol = 5
 			maxrow = int(numpy.ceil(maxsats/maxcol))
 
+			num_of_slots=maxcol*maxrow
 
 			fig, axs = pyplot.subplots(maxrow, maxcol, figsize=(12, 12), dpi=1800) #,constrained_layout = True
 
@@ -113,7 +116,8 @@ def main(datafolder,daystring):
 						SC3_TIME = (dic["%s_%03d_S_TW"%(GNSSid,eachsat)][:-1] %86400 )/86400.0*24.0
 						SC3_ELEV =  dic["%s_%03d_ELEV"%(GNSSid,eachsat)][:-1]
 						SC3_S401 =  dic["%s_%03d_S401"%(GNSSid,eachsat)][:-1]*30.0
-
+						full_S401.append(numpy.where(SC3_ELEV>=40,SC3_S401,float("nan") ) )
+						full_TIME.append(SC3_TIME)#np.where((-threshold<diff_phase) & (diff_phase<threshold),diff_phase,float("nan"))
 						SC3_TTIME_DIFF = numpy.diff(SC3_TTIME)
 						for timex in range(0,2):
 							SC3_TTIME[numpy.argmax(SC3_TTIME_DIFF)-1]=float("nan")
@@ -135,7 +139,7 @@ def main(datafolder,daystring):
 						axs[each_row, each_col].text(texttime,22,sc2_coid,fontsize=7,weight='bold')
 
 						if each_col == 0:
-							axs[each_row, each_col].set_ylabel('rTEC&S4*30', fontsize = 7)
+							axs[each_row, each_col].set_ylabel('S4*30', fontsize = 7)
 							axs[each_row, each_col].grid(True,which='minor',linestyle='--',linewidth=0.1)
 							axs[each_row, each_col].grid(True,which='major',linestyle='--',linewidth=0.4)
 							axs[each_row, each_col].set_yticks(numpy.arange(0, 30.1, step=6))  # Set label locations
@@ -143,8 +147,11 @@ def main(datafolder,daystring):
 							axs[each_row, each_col].tick_params(axis='y',which='major', width=0.7, labelsize=5)#X and y labels font size
 							axs2.tick_params(axis='y',which='major', width=0.7, labelsize=5)#X and y labels font size
 							axs[each_row, each_col].set_xticks(numpy.arange(0, 24.1, step=3))  # Set label locations
-							pyplot.setp(axs[each_row, each_col].get_xmajorticklabels(), visible=False)
 							pyplot.setp(axs2.get_ymajorticklabels(), visible=False)
+							if each_row == (maxrow-1):
+								pyplot.setp(axs[each_row, each_col].get_xmajorticklabels(), visible=True)
+							else:
+								pyplot.setp(axs[each_row, each_col].get_xmajorticklabels(), visible=False)
 
 						if each_row == (maxrow-1):
 							axs[each_row, each_col].set_xlabel('Universal Time', fontsize = 7)
@@ -155,7 +162,7 @@ def main(datafolder,daystring):
 							axs[each_row, each_col].grid(True,which='major',linestyle='--',linewidth=0.4)
 							axs[each_row, each_col].tick_params(axis='x',which='major', width=0.7, labelsize=5)#X and y labels
 							axs2.tick_params(axis='y',which='major', width=0.7, labelsize=5)#X and y labels font size font size
-							pyplot.setp(axs[each_row, each_col].get_xmajorticklabels(), visible=False)
+							pyplot.setp(axs[each_row, each_col].get_xmajorticklabels(), visible=True)
 							pyplot.setp(axs2.get_ymajorticklabels(), visible=False)
 						else:
 							axs[each_row, each_col].set_xticks(numpy.arange(0, 24.1, step=3))  # Set label locations
@@ -167,8 +174,7 @@ def main(datafolder,daystring):
 							pyplot.setp(axs[each_row, each_col].get_xmajorticklabels(), visible=False)
 							pyplot.setp(axs2.get_ymajorticklabels(), visible=False)
 							if each_col == (maxcol-1):
-								pyplot.setp(axs2.get_ymajorticklabels(), visible=True)
-
+								pyplot.setp(axs2.get_ymajorticklabels(), visible=False)
 
 						axs[each_row, each_col].set_ylim(0, 30.1)
 						axs[each_row, each_col].set_xlim(0, 24.1)
@@ -177,13 +183,32 @@ def main(datafolder,daystring):
 						if each_col == maxcol:
 							each_row=each_row+1
 							each_col = 0
+						num_of_slots=num_of_slots-1
+
+			for slot in range(0,num_of_slots):
+				axs[each_row, each_col+slot].set_xlabel('Universal Time', fontsize = 7)
+				axs[each_row, each_col+slot].set_xticks(numpy.arange(0, 24.1, step=3))  # Set label locations
+				axs[each_row, each_col+slot].set_yticks(numpy.arange(0, 30.1, step=6))  # Set label locations.
+				axs2.set_yticks(numpy.arange(0, 90.1, step=18))  # Set label locations
+				axs[each_row, each_col+slot].grid(True,which='minor',linestyle='--',linewidth=0.1)
+				axs[each_row, each_col+slot].grid(True,which='major',linestyle='--',linewidth=0.4)
+				axs[each_row, each_col+slot].tick_params(axis='x',which='major', width=0.7, labelsize=5)#X and y labels
+				axs2.tick_params(axis='y',which='major', width=0.7, labelsize=5)#X and y labels font size font size
+				if each_col+slot == (maxcol-1):
+					pyplot.setp(axs2.get_ymajorticklabels(), visible=False)
+
+				if slot == num_of_slots-1:
+					axs[each_row, each_col+slot].plot(full_TIME, full_S401,'o',color='#d62728',ms=0.2)
+					axs[each_row, each_col+slot].set_ylim(0, 30.1)
+					axs[each_row, each_col+slot].set_xlim(0, 24.1)
+					axs[each_row, each_col+slot].set_xticks(numpy.arange(0, 24.1, step=3))  # Set label locations
+					axs[each_row, each_col+slot].set_yticks(numpy.arange(0, 30.1, step=6))  # Set label locations.
 
 			# # Hide x labels and tick labels for top plots and y ticks for right plots.
 			for ax in axs.flat:
 				ax.label_outer()
 			#     ax2= ax.twinx()
 			#     ax2.label_outer()
-
 
 			#pyplot.show()
 			pngfilename = h5filename.replace('h5','png').replace('proc','plots')
@@ -198,7 +223,7 @@ def main(datafolder,daystring):
 if __name__=="__main__":
 	parser = optparse.OptionParser()
 	parser.add_option('-p',"--path",dest='datapath',type="string",default=r'\\UARS_NAS01\scintpi3_data\sc000\proc')
-	parser.add_option('-d',"--day", dest='daystring',type="string",default="20210823")
+	parser.add_option('-d',"--day", dest='daystring',type="string",default="20210830")
 	(op, args) = parser.parse_args()
 	main(op.datapath,op.daystring)
 # In[ ]:

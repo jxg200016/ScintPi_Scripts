@@ -76,7 +76,7 @@ glolist=[]
 # gnsslist=['00'] # only GPS
 gnssdic={'00':['GPS',gpslist],'01':['SBS',sbslist],'02':['GAL',gallist],'03':['BDS',bdslist],'06':['GLO',glolist]}
 
-h5filename='//UARS_NAS01/scintpi3_data/sc004/proc/sc3_lvl2_20210829_0001_967572.6875W_329918.2812N_v325.h5'
+h5filename='//UARS_NAS01/scintpi3_data/sc000/proc/sc3_lvl2_20210831_0002_967573.3750W_329918.5000N_v325.h5'
 print ("Reading %s file"%(h5filename))
 h5file = h5py.File(h5filename,'r+')
 for conste in h5file.keys():
@@ -98,6 +98,22 @@ for conste in h5file.keys():
 			print ("%s_%s_%s"%(GNSSid,svid,each_param))
 			dic["%s_%s_%s"%(GNSSid,svid,each_param)] = groups.get(member[0]).get(each_param)[0]
 h5file.close()
+scintpif_time = (dic["00_026_T_TW"]%86400)/86400.0*24.0
+scintpi_time = (dic["00_026_S_TW"]%86400)/86400.0*24.0
+scintpi_SNR1 = dic["00_026_SNR1"]
+scintpi_rTEC = dic["00_026_PTEC"]
+scintpi_ELEV = dic["00_026_ELEV"]
+scintpi_rTEC_diff = list(np.diff(scintpi_rTEC))
+scintpi_rTEC_diff.append(0)
+
+scintpi_SNR1_diff = list(np.diff(scintpi_SNR1))
+scintpi_SNR1_diff.append(0)
+
+plt.plot(scintpif_time,scintpi_rTEC_diff,'--b')
+plt.plot(scintpi_time,scintpi_SNR1_diff,'-g')
+plt.show()
+
+
 
 
 
